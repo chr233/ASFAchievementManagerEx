@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace ASFAchievementManagerEx.Data;
-class StatData
+internal sealed record StatData
 {
     public uint StatNum { get; set; }
     public int BitNum { get; set; }

@@ -15,17 +15,16 @@ using Newtonsoft.Json.Linq;
 using System.Text;
 using ASFAchievementManagerEx.Data;
 using ASFAchievementManagerEx.Localization;
+using Newtonsoft.Json;
+using System.ComponentModel;
 
 namespace ASFAchievementManagerEx;
 
 [Export(typeof(IPlugin))]
-public sealed class ASFAchievemenevementManagerEx : IASF, IBotSteamClient, IBotCommand2
+public sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotCommand2
 {
     public string Name => "ASF Achievemenevement Manager Ex";
-
     public Version Version => MyVersion;
-
-    private static readonly ConcurrentDictionary<Bot, AchievementHandler> AchievementHandlers = new();
 
     private static Timer? StatisticTimer;
 
@@ -62,7 +61,7 @@ public sealed class ASFAchievemenevementManagerEx : IASF, IBotSteamClient, IBotC
             }
         }
 
-        Utils.Config = config ?? new();
+        Config = config ?? new();
 
         //使用协议
         if (!Config.EULA)
@@ -82,7 +81,7 @@ public sealed class ASFAchievemenevementManagerEx : IASF, IBotSteamClient, IBotC
         {
             var request = new Uri("https://asfe.chrxw.com/asfachievemenevementmanagerex");
             StatisticTimer = new Timer(
-                async (_) => await ASF.WebBrowser!.UrlGetToHtmlDocument(request).ConfigureAwait(false),
+                async (_) => await ASF.WebBrowser!.UrlGetToHtmlDocument(request),
                 null,
                 TimeSpan.FromSeconds(30),
                 TimeSpan.FromHours(24)
@@ -104,183 +103,179 @@ public sealed class ASFAchievemenevementManagerEx : IASF, IBotSteamClient, IBotC
         return Task.CompletedTask;
     }
 
-
+    /// <summary>
+    /// 插件加载事件
+    /// </summary>
+    /// <returns></returns>
     public Task OnLoaded()
     {
-        ASFLogger.LogGenericInfo("ASF Achievement Manager Plugin by Ryzhehvost, powered by ginger cats");
-        return Task.CompletedTask;
-    }
+        var message = new StringBuilder("\n");
+        message.AppendLine(Static.Line);
+        message.AppendLine(Static.Logo);
+        message.AppendLine(Static.Line);
+        message.AppendLine(string.Format(Langs.PluginVer, nameof(ASFAchievementManagerEx), MyVersion.ToString()));
+        message.AppendLine(Langs.PluginContact);
+        message.AppendLine(Langs.PluginInfo);
+        message.AppendLine(Static.Line);
 
-    public async Task<string?> OnBotCommand(Bot bot, EAccess access, string message, string[] args, ulong steamID = 0)
-    {
-        switch (args.Length)
+        var pluginFolder = Path.GetDirectoryName(MyLocation) ?? ".";
+        var backupPath = Path.Combine(pluginFolder, $"{nameof(ASFAchievementManagerEx)}.bak");
+
+        if (File.Exists(backupPath))
         {
-            case 0:
-                bot.ArchiLogger.LogNullError(null, nameof(args));
-
-                return null;
-            case 1:
-                return args[0].ToUpperInvariant() switch
-                {
-                    _ => null,
-                };
-            default:
-                return args[0].ToUpperInvariant() switch
-                {
-                    "ALIST" when args.Length > 2 => await ResponseAchievementList(access, steamID, args[1], Utilities.GetArgsAsText(args, 2, ",")).ConfigureAwait(false),
-                    "ALIST" => await ResponseAchievementList(access, bot, args[1]).ConfigureAwait(false),
-                    "ASET" when args.Length > 3 => await ResponseAchievementSet(access, steamID, args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), true).ConfigureAwait(false),
-                    "ASET" when args.Length > 2 => await ResponseAchievementSet(access, bot, args[1], Utilities.GetArgsAsText(args, 2, ","), true).ConfigureAwait(false),
-                    "ARESET" when args.Length > 3 => await ResponseAchievementSet(access, steamID, args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), false).ConfigureAwait(false),
-                    "ARESET" when args.Length > 2 => await ResponseAchievementSet(access, bot, args[1], Utilities.GetArgsAsText(args, 2, ","), false).ConfigureAwait(false),
-                    _ => null,
-                };
-        }
-    }
-
-    public Task OnBotSteamCallbacksInit(Bot bot, CallbackManager callbackManager) => Task.CompletedTask;
-
-    public Task<IReadOnlyCollection<ClientMsgHandler>?> OnBotSteamHandlersInit(Bot bot)
-    {
-        AchievementHandler CurrentBotAchievementHandler = new();
-        AchievementHandlers.TryAdd(bot, CurrentBotAchievementHandler);
-        return Task.FromResult<IReadOnlyCollection<ClientMsgHandler>?>(new HashSet<ClientMsgHandler> { CurrentBotAchievementHandler });
-    }
-
-    //Responses
-
-    private static async Task<string?> ResponseAchievementList(EAccess access, Bot bot, string appids)
-    {
-        if (access < EAccess.Master)
-        {
-            return null;
-        }
-
-        string[] gameIDs = appids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-        if (gameIDs.Length == 0)
-        {
-            return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, nameof(gameIDs)));
-        }
-        if (AchievementHandlers.TryGetValue(bot, out AchievementHandler? AchievementHandler))
-        {
-            if (AchievementHandler == null)
+            try
             {
-                bot.ArchiLogger.LogNullError(AchievementHandler);
-                return null;
+                File.Delete(backupPath);
+                message.AppendLine(Langs.CleanUpOldBackup);
             }
-
-            HashSet<uint> gamesToGetAchievements = new();
-
-            foreach (string game in gameIDs)
+            catch (Exception e)
             {
-                if (!uint.TryParse(game, out uint gameID) || (gameID == 0))
-                {
-                    return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorParsingObject, nameof(gameID)));
-                }
-
-                gamesToGetAchievements.Add(gameID);
+                ASFLogger.LogGenericException(e);
+                message.AppendLine(Langs.CleanUpOldBackupFailed);
             }
-
-
-            IList<string> results = await Utilities.InParallel(gamesToGetAchievements.Select(appID => Task.Run<string>(() => AchievementHandler.GetAchievements(bot, appID)))).ConfigureAwait(false);
-
-            List<string> responses = new(results.Where(result => !string.IsNullOrEmpty(result)));
-
-            return responses.Count > 0 ? bot.Commands.FormatBotResponse(string.Join(Environment.NewLine, responses)) : null;
-
         }
         else
         {
-
-            return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, nameof(AchievementHandlers)));
+            message.AppendLine(Langs.ASFEVersionTips);
+            message.AppendLine(Langs.ASFEUpdateTips);
         }
 
+        message.AppendLine(Static.Line);
+
+        ASFLogger.LogGenericInfo(message.ToString());
+
+        return Task.CompletedTask;
     }
 
-    private static async Task<string?> ResponseAchievementList(EAccess access, ulong steamID, string botNames, string appids)
+    /// <summary>
+    /// 处理命令
+    /// </summary>
+    /// <param name="bot"></param>
+    /// <param name="access"></param>
+    /// <param name="message"></param>
+    /// <param name="args"></param>
+    /// <param name="steamId"></param>
+    /// <returns></returns>
+    private static Task<string?>? ResponseCommand(Bot bot, EAccess access, string message, string[] args)
     {
+        var cmd = args[0].ToUpperInvariant();
 
-        HashSet<Bot>? bots = Bot.GetBots(botNames);
-
-        if ((bots == null) || (bots.Count == 0))
+        if (cmd.StartsWith("AAM."))
         {
-            return Commands.FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
+            cmd = cmd[5..];
         }
-
-        IList<string?> results = await Utilities.InParallel(bots.Select(bot => ResponseAchievementList(Commands.GetProxyAccess(bot, access, steamID), bot, appids))).ConfigureAwait(false);
-
-        List<string?> responses = new(results.Where(result => !string.IsNullOrEmpty(result)));
-
-        return responses.Count > 0 ? string.Join(Environment.NewLine, responses) : null;
-    }
-
-
-    private static async Task<string?> ResponseAchievementSet(EAccess access, Bot bot, string appid, string achievementNumbers, bool set = true)
-    {
-        if (access < EAccess.Master)
+        else
         {
-            return null;
-        }
-
-        if (string.IsNullOrEmpty(achievementNumbers))
-        {
-            return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorObjectIsNull, nameof(achievementNumbers)));
-        }
-        if (!uint.TryParse(appid, out uint appId))
-        {
-            return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsInvalid, nameof(appId)));
-        }
-
-        if (!AchievementHandlers.TryGetValue(bot, out AchievementHandler? AchievementHandler))
-        {
-            return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, nameof(AchievementHandlers)));
-        }
-
-        if (AchievementHandler == null)
-        {
-            bot.ArchiLogger.LogNullError(AchievementHandler);
-            return null;
-        }
-
-        HashSet<uint> achievements = new();
-
-        string[] achievementStrings = achievementNumbers.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-        if (!achievementNumbers.Equals("*"))
-        {
-            foreach (string achievement in achievementStrings)
+            //跳过禁用命令
+            if (Config.DisabledCmds?.Contains(cmd) == true)
             {
-                if (!uint.TryParse(achievement, out uint achievementNumber) || (achievementNumber == 0))
+                ASFLogger.LogGenericInfo("Command {0} is disabled!");
+                return null;
+            }
+        }
+
+        var argLength = args.Length;
+        switch (argLength)
+        {
+            case 0:
+                throw new InvalidOperationException(nameof(args));
+            case 1:
+                return null;
+
+            default:
+                return cmd switch
                 {
-                    return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorParsingObject, achievement));
-                }
+                    "ALIST" when argLength > 2 && access >= EAccess.Master => Command.ResponseAchievementList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
+                    "ALIST" when access >= EAccess.Master => Command.ResponseAchievementList(bot, args[1]),
 
-                achievements.Add(achievementNumber);
-            }
-            if (achievements.Count == 0)
-            {
-                return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, "Achievements list"));
-            }
+                    "ASET" when argLength > 3 && access >= EAccess.Master => Command.ResponseAchievementSet(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), true),
+                    "ASET" when argLength > 2 && access >= EAccess.Master => Command.ResponseAchievementSet(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), true),
+
+                    "ARESET" when argLength > 3 && access >= EAccess.Master => Command.ResponseAchievementSet(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), false),
+                    "ARESET" when argLength > 2 && access >= EAccess.Master => Command.ResponseAchievementSet(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), false),
+
+                    "ASTATS" when argLength > 1 && access >= EAccess.Master => Command.ResponseAchievementStatList(bot, args[1]),
+                    _ => null,
+                };
         }
-        return bot.Commands.FormatBotResponse(await Task.Run<string>(() => AchievementHandler.SetAchievements(bot, appId, achievements, set)).ConfigureAwait(false));
     }
 
-    private static async Task<string?> ResponseAchievementSet(EAccess access, ulong steamID, string botNames, string appid, string achievementNumbers, bool set = true)
+    public Task OnBotSteamCallbacksInit(Bot bot, CallbackManager callbackManager)
     {
-
-        HashSet<Bot>? bots = Bot.GetBots(botNames);
-
-        if ((bots == null) || (bots.Count == 0))
-        {
-            return Commands.FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
-        }
-
-        IList<string?> results = await Utilities.InParallel(bots.Select(bot => ResponseAchievementSet(Commands.GetProxyAccess(bot, access, steamID), bot, appid, achievementNumbers, set))).ConfigureAwait(false);
-
-        List<string?> responses = new(results.Where(result => !string.IsNullOrEmpty(result)));
-
-        return responses.Count > 0 ? string.Join(Environment.NewLine, responses) : null;
+        return Task.CompletedTask;
     }
 
+    public Task<IReadOnlyCollection<ClientMsgHandler>?> OnBotSteamHandlersInit(Bot bot)
+    {
+        Handler CurrentBotAchievementHandler = new();
+
+        Command.Handlers.TryAdd(bot, CurrentBotAchievementHandler);
+
+        return Task.FromResult<IReadOnlyCollection<ClientMsgHandler>?>(new HashSet<ClientMsgHandler> { CurrentBotAchievementHandler });
+    }
+
+    /// <summary>
+    /// 处理命令事件
+    /// </summary>
+    /// <param name="bot"></param>
+    /// <param name="access"></param>
+    /// <param name="message"></param>
+    /// <param name="args"></param>
+    /// <param name="steamId"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidEnumArgumentException"></exception>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task<string?> OnBotCommand(Bot bot, EAccess access, string message, string[] args, ulong steamId = 0)
+    {
+        if (!Enum.IsDefined(access))
+        {
+            throw new InvalidEnumArgumentException(nameof(access), (int)access, typeof(EAccess));
+        }
+
+        try
+        {
+            var task = ResponseCommand(bot, access, message, args);
+            if (task != null)
+            {
+                return await task.ConfigureAwait(false);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            var version = await bot.Commands.Response(EAccess.Owner, "VERSION") ?? Langs.AccountSubUnknown;
+            var i = version.LastIndexOf('V');
+            if (i >= 0)
+            {
+                version = version[++i..];
+            }
+            var cfg = JsonConvert.SerializeObject(Config, Formatting.Indented);
+
+            var sb = new StringBuilder();
+            sb.AppendLine(Langs.ErrorLogTitle);
+            sb.AppendLine(Static.Line);
+            sb.AppendLine(string.Format(Langs.ErrorLogOriginMessage, message));
+            sb.AppendLine(string.Format(Langs.ErrorLogAccess, access.ToString()));
+            sb.AppendLine(string.Format(Langs.ErrorLogASFVersion, version));
+            sb.AppendLine(string.Format(Langs.ErrorLogPluginVersion, MyVersion));
+            sb.AppendLine(Static.Line);
+            sb.AppendLine(cfg);
+            sb.AppendLine(Static.Line);
+            sb.AppendLine(string.Format(Langs.ErrorLogErrorName, ex.GetType()));
+            sb.AppendLine(string.Format(Langs.ErrorLogErrorMessage, ex.Message));
+            sb.AppendLine(ex.StackTrace);
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(500);
+                sb.Insert(0, '\n');
+                ASFLogger.LogGenericError(sb.ToString());
+            });
+
+            return sb.ToString();
+        }
+    }
 }

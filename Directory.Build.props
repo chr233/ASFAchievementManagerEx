@@ -31,11 +31,11 @@
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 		<DebugType>portable</DebugType>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
 		<DebuggerSupport>false</DebuggerSupport>

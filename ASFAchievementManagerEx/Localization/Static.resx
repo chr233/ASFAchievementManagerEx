@@ -118,17 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Logo" xml:space="preserve">
-    <value> █████╗ ███████╗███████╗███████╗███╗   ██╗██╗  ██╗ █████╗ ███╗   ██╗ ██████╗███████╗
-██╔══██╗██╔════╝██╔════╝██╔════╝████╗  ██║██║  ██║██╔══██╗████╗  ██║██╔════╝██╔════╝
-███████║███████╗█████╗  █████╗  ██╔██╗ ██║███████║███████║██╔██╗ ██║██║     █████╗  
-██╔══██║╚════██║██╔══╝  ██╔══╝  ██║╚██╗██║██╔══██║██╔══██║██║╚██╗██║██║     ██╔══╝  
-██║  ██║███████║██║     ███████╗██║ ╚████║██║  ██║██║  ██║██║ ╚████║╚██████╗███████╗
-╚═╝  ╚═╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚══════╝</value>
+    <value>ASFAchievementManagerEx</value>
   </data>
   <data name="Line" xml:space="preserve">
     <value>==========================================</value>
   </data>
   <data name="DefaultSteamAvatar" xml:space="preserve">
     <value>https://avatars.akamai.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>❌</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>⚠️</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>✅</value>
   </data>
 </root>

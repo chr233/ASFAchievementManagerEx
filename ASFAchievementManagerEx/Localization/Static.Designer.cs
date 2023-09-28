@@ -79,16 +79,38 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
-        ///   查找类似  █████╗ ███████╗███████╗███████╗███╗   ██╗██╗  ██╗ █████╗ ███╗   ██╗ ██████╗███████╗
-        ///██╔══██╗██╔════╝██╔════╝██╔════╝████╗  ██║██║  ██║██╔══██╗████╗  ██║██╔════╝██╔════╝
-        ///███████║███████╗█████╗  █████╗  ██╔██╗ ██║███████║███████║██╔██╗ ██║██║     █████╗  
-        ///██╔══██║╚════██║██╔══╝  ██╔══╝  ██║╚██╗██║██╔══██║██╔══██║██║╚██╗██║██║     ██╔══╝  
-        ///██║  ██║███████║██║     ███████╗██║ ╚████║██║  ██║██║  ██║██║ ╚████║╚██████╗███████╗
-        ///╚═╝  ╚═╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚═════ [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///   查找类似 ASFAchievementManagerEx 的本地化字符串。
         /// </summary>
         internal static string Logo {
             get {
                 return ResourceManager.GetString("Logo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ❌ 的本地化字符串。
+        /// </summary>
+        internal static string No {
+            get {
+                return ResourceManager.GetString("No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ⚠️ 的本地化字符串。
+        /// </summary>
+        internal static string Warning {
+            get {
+                return ResourceManager.GetString("Warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ✅ 的本地化字符串。
+        /// </summary>
+        internal static string Yes {
+            get {
+                return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
     }
