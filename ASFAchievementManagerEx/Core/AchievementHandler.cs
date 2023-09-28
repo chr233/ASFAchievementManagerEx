@@ -1,75 +1,41 @@
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using ArchiSteamFarm.Core;
-using ArchiSteamFarm.Steam;
 using ArchiSteamFarm.Localization;
+using ArchiSteamFarm.Steam;
+using ASFAchievementManagerEx.Core.Callbacks;
+using ASFAchievementManagerEx.Localization;
 using SteamKit2;
 using SteamKit2.Internal;
-using ASFAchievementManagerEx.Data;
-using ASFAchievementManagerEx.Localization;
+using System.Globalization;
 using System.Text;
 
 namespace ASFAchievementManagerEx.Core;
 
-public sealed class Handler : ClientMsgHandler
+public sealed class AchievementHandler : ClientMsgHandler
 {
+    /// <summary>
+    /// 处理客户端消息
+    /// </summary>
+    /// <param name="packetMsg"></param>
     public override void HandleMsg(IPacketMsg packetMsg)
     {
         if (packetMsg == null)
         {
-            ASF.ArchiLogger.LogNullError(packetMsg);
-
+            ASFLogger.LogNullError(packetMsg);
             return;
         }
 
         switch (packetMsg.MsgType)
         {
             case EMsg.ClientGetUserStatsResponse:
-                ClientMsgProtobuf<CMsgClientGetUserStatsResponse> getAchievementsResponse = new(packetMsg);
+                var getAchievementsResponse = new ClientMsgProtobuf<CMsgClientGetUserStatsResponse>(packetMsg);
                 Client.PostCallback(new GetAchievementsCallback(packetMsg.TargetJobID, getAchievementsResponse.Body));
                 break;
+
             case EMsg.ClientStoreUserStatsResponse:
-                ClientMsgProtobuf<CMsgClientStoreUserStatsResponse> setAchievementsResponse = new(packetMsg);
+                var setAchievementsResponse = new ClientMsgProtobuf<CMsgClientStoreUserStatsResponse>(packetMsg);
                 Client.PostCallback(new SetAchievementsCallback(packetMsg.TargetJobID, setAchievementsResponse.Body));
                 break;
         }
-
-    }
-
-    internal abstract class AchievementsCallBack<T> : CallbackMsg
-    {
-        internal readonly T Response;
-        internal readonly bool Success;
-
-        internal AchievementsCallBack(JobID jobID, T msg, Func<T, EResult> eresultGetter, string error)
-        {
-            if (msg == null)
-                throw new ArgumentNullException(nameof(msg));
-
-            JobID = jobID ?? throw new ArgumentNullException(nameof(jobID));
-            Success = eresultGetter(msg) == EResult.OK;
-            Response = msg;
-
-            if (!Success)
-                ASF.ArchiLogger.LogGenericError(string.Format(Strings.ErrorFailingRequest, error));
-        }
-
-    }
-
-    internal sealed class GetAchievementsCallback : AchievementsCallBack<CMsgClientGetUserStatsResponse>
-    {
-        internal GetAchievementsCallback(JobID jobID, CMsgClientGetUserStatsResponse msg)
-            : base(jobID, msg, msg => (EResult)msg.eresult, "GetAchievements") { }
-    }
-
-    internal sealed class SetAchievementsCallback : AchievementsCallBack<CMsgClientStoreUserStatsResponse>
-    {
-        internal SetAchievementsCallback(JobID jobID, CMsgClientStoreUserStatsResponse msg)
-            : base(jobID, msg, msg => (EResult)msg.eresult, "SetAchievements") { }
     }
 
     //Utilities
@@ -84,7 +50,7 @@ public sealed class Handler : ClientMsgHandler
             {
                 if (!KeyValues.TryReadAsBinary(ms))
                 {
-                    ASF.ArchiLogger.LogGenericError(string.Format(Strings.ErrorIsInvalid, nameof(Response.schema)));
+                    ASFLogger.LogGenericError(string.Format(Strings.ErrorIsInvalid, nameof(Response.schema)));
                     return null;
                 };
             }
@@ -210,12 +176,10 @@ public sealed class Handler : ClientMsgHandler
             {
                 if (!KeyValues.TryReadAsBinary(ms))
                 {
-                    ASF.ArchiLogger.LogGenericError(string.Format(Strings.ErrorIsInvalid, nameof(Response.schema)));
+                    ASFLogger.LogGenericError(string.Format(Strings.ErrorIsInvalid, nameof(Response.schema)));
                     return null;
                 };
             }
-
-            //first we enumerate all real achievements
 
             //Now we update all dependancies
             foreach (var stat in KeyValues.Children.Find(Child => Child.Name == "stats")?.Children ?? new List<KeyValue>())
@@ -372,13 +336,6 @@ public sealed class Handler : ClientMsgHandler
         return responses.Count > 0 ? "\u200B\nAchievements for " + gameID.ToString() + ":\n" + string.Join(Environment.NewLine, responses) : "Can't retrieve achievements for " + gameID.ToString();
     }
 
-
-
-
-
-
-
-
     internal async Task<string> SetAchievementsStats(Bot bot, uint appId, HashSet<uint> achievements, bool set = true)
     {
         if (!Client.IsConnected)
@@ -389,14 +346,9 @@ public sealed class Handler : ClientMsgHandler
         var responses = new List<string>();
 
         var response = await GetAchievementsResponse(bot, appId);
-        if (response == null)
+        if (response?.Success != true)
         {
             bot.ArchiLogger.LogNullError(response);
-            return "Can't retrieve achievements for " + appId.ToString(); ;
-        }
-
-        if (!response.Success)
-        {
             return "Can't retrieve achievements for " + appId.ToString(); ;
         }
 
@@ -404,14 +356,14 @@ public sealed class Handler : ClientMsgHandler
         {
             bot.ArchiLogger.LogNullError(response.Response);
             responses.Add(Strings.WarningFailed);
-            return "\u200B\n" + string.Join(Environment.NewLine, responses);
+            return "" + string.Join(Environment.NewLine, responses);
         }
 
         var Stats = ParseResponse(response.Response);
         if (Stats == null)
         {
             responses.Add(Strings.WarningFailed);
-            return "\u200B\n" + string.Join(Environment.NewLine, responses);
+            return "" + string.Join(Environment.NewLine, responses);
         }
 
         var statsToSet = new List<CMsgClientStoreUserStats2.Stats>();

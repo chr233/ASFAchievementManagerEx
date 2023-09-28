@@ -1,4 +1,4 @@
-# ASFAchievementManagerEx 
+# ASFAchievementManagerEx
 
 > Forked from [Rudokhvist/ASF-Achievement-Manager](https://github.com/Rudokhvist/ASF-Achievement-Manager)
 

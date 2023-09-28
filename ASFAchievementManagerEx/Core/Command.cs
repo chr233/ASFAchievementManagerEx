@@ -2,17 +2,14 @@ using ArchiSteamFarm.Core;
 using ArchiSteamFarm.Localization;
 using ArchiSteamFarm.Steam;
 using ArchiSteamFarm.Steam.Interaction;
-using System;
+using ASFAchievementManagerEx.Localization;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ASFAchievementManagerEx.Core;
 internal static class Command
 {
-    internal static ConcurrentDictionary<Bot, Handler> Handlers { get; private set; } = new();
+    internal static ConcurrentDictionary<Bot, AchievementHandler> Handlers { get; private set; } = new();
 
     /// <summary>
     /// 显示成就列表
@@ -22,42 +19,33 @@ internal static class Command
     /// <returns></returns>
     internal static async Task<string?> ResponseAchievementList(Bot bot, string appids)
     {
-        var gameIDs = appids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-        if (gameIDs.Length == 0)
+        if (!Handlers.TryGetValue(bot, out var AchievementHandler))
         {
-            return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, nameof(gameIDs)));
+            ASFLogger.LogNullError(AchievementHandler);
+            return null;
         }
-        if (Handlers.TryGetValue(bot, out Handler? AchievementHandler))
+
+        var sb = new StringBuilder();
+        sb.AppendLine(bot.FormatBotResponse(Langs.MultipleLineResult));
+
+        string[] gameIDs = appids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (string game in gameIDs)
         {
-            if (AchievementHandler == null)
+            if (!uint.TryParse(game, out uint gameId) || (gameId == 0))
             {
-                bot.ArchiLogger.LogNullError(AchievementHandler);
-                return null;
+                sb.AppendLine(bot.FormatBotResponse(string.Format(Strings.ErrorIsInvalid, nameof(gameId))));
+            }
+            else
+            {
+                var result = await AchievementHandler.GetAchievements(bot, gameId).ConfigureAwait(false);
+                sb.AppendLine(bot.FormatBotResponse(result));
             }
 
-            var gamesToGetAchievements = new HashSet<uint>();
-
-            foreach (string game in gameIDs)
-            {
-                if (!uint.TryParse(game, out uint gameID) || (gameID == 0))
-                {
-                    return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorParsingObject, nameof(gameID)));
-                }
-
-                gamesToGetAchievements.Add(gameID);
-            }
-
-            var results = await Utilities.InParallel(gamesToGetAchievements.Select(appID => Task.Run<string>(() => AchievementHandler.GetAchievements(bot, appID)))).ConfigureAwait(false);
-
-            List<string> responses = new(results.Where(result => !string.IsNullOrEmpty(result)));
-
-            return responses.Count > 0 ? bot.Commands.FormatBotResponse(string.Join(Environment.NewLine, responses)) : null;
+            sb.AppendLine();
         }
-        else
-        {
-            return bot.FormatBotResponse("未获取到成就信息");
-        }
+
+        return sb.Length > 0 ? sb.ToString() : null;
     }
 
     /// <summary>
@@ -68,11 +56,16 @@ internal static class Command
     /// <returns></returns>
     internal static async Task<string?> ResponseAchievementList(string botNames, string appids)
     {
+        if (string.IsNullOrEmpty(botNames))
+        {
+            throw new ArgumentNullException(nameof(botNames));
+        }
+
         var bots = Bot.GetBots(botNames);
 
-        if ((bots == null) || (bots.Count == 0))
+        if (bots == null || bots.Count == 0)
         {
-            return Commands.FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
+            return FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
         }
 
         var results = await Utilities.InParallel(bots.Select(bot => ResponseAchievementList(bot, appids))).ConfigureAwait(false);
@@ -82,27 +75,30 @@ internal static class Command
         return responses.Count > 0 ? string.Join(Environment.NewLine, responses) : null;
     }
 
-
+    /// <summary>
+    /// 修改成就
+    /// </summary>
+    /// <param name="bot"></param>
+    /// <param name="appid"></param>
+    /// <param name="achievementNumbers"></param>
+    /// <param name="set"></param>
+    /// <returns></returns>
     internal static async Task<string?> ResponseAchievementSet(Bot bot, string appid, string achievementNumbers, bool set = true)
     {
         if (string.IsNullOrEmpty(achievementNumbers))
         {
-            return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorObjectIsNull, nameof(achievementNumbers)));
+            throw new ArgumentNullException(nameof(achievementNumbers));
         }
+
+        if (!Handlers.TryGetValue(bot, out AchievementHandler? AchievementHandler))
+        {
+            ASFLogger.LogNullError(AchievementHandler);
+            return null;
+        }
+
         if (!uint.TryParse(appid, out uint appId))
         {
-            return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsInvalid, nameof(appId)));
-        }
-
-        if (!Handlers.TryGetValue(bot, out Handler? AchievementHandler))
-        {
-            return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, nameof(Handlers)));
-        }
-
-        if (AchievementHandler == null)
-        {
-            bot.ArchiLogger.LogNullError(AchievementHandler);
-            return null;
+            return bot.FormatBotResponse(string.Format(Strings.ErrorIsInvalid, nameof(appId)));
         }
 
         var achievements = new HashSet<uint>();
@@ -115,27 +111,39 @@ internal static class Command
             {
                 if (!uint.TryParse(achievement, out uint achievementNumber) || (achievementNumber == 0))
                 {
-                    return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorParsingObject, achievement));
+                    return bot.FormatBotResponse(string.Format(Strings.ErrorParsingObject, achievement));
                 }
 
                 achievements.Add(achievementNumber);
             }
             if (achievements.Count == 0)
             {
-                return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, "Achievements list"));
+                return bot.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, "Achievements list"));
             }
         }
-        return bot.Commands.FormatBotResponse(await Task.Run<string>(() => AchievementHandler.SetAchievements(bot, appId, achievements, set)).ConfigureAwait(false));
+        return bot.FormatBotResponse(await Task.Run(() => AchievementHandler.SetAchievements(bot, appId, achievements, set)).ConfigureAwait(false));
     }
 
+    /// <summary>
+    /// 修改成就 (多个Bot)
+    /// </summary>
+    /// <param name="botNames"></param>
+    /// <param name="appid"></param>
+    /// <param name="achievementNumbers"></param>
+    /// <param name="set"></param>
+    /// <returns></returns>
     internal static async Task<string?> ResponseAchievementSet(string botNames, string appid, string achievementNumbers, bool set = true)
     {
+        if (string.IsNullOrEmpty(botNames))
+        {
+            throw new ArgumentNullException(nameof(botNames));
+        }
 
         var bots = Bot.GetBots(botNames);
 
-        if ((bots == null) || (bots.Count == 0))
+        if (bots == null || bots.Count == 0)
         {
-            return Commands.FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
+            return FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
         }
 
         var results = await Utilities.InParallel(bots.Select(bot => ResponseAchievementSet(bot, appid, achievementNumbers, set))).ConfigureAwait(false);
@@ -149,45 +157,79 @@ internal static class Command
 
 
 
+    /// <summary>
+    /// 获取成就数据列表
+    /// </summary>
+    /// <param name="bot"></param>
+    /// <param name="appids"></param>
+    /// <returns></returns>
     internal static async Task<string?> ResponseAchievementStatList(Bot bot, string appids)
     {
+        if (!Handlers.TryGetValue(bot, out var AchievementHandler))
+        {
+            ASFLogger.LogNullError(AchievementHandler);
+            return null;
+        }
+
         var gameIDs = appids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
         if (gameIDs.Length == 0)
         {
-            return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, nameof(gameIDs)));
+            return bot.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, nameof(gameIDs)));
         }
-        if (Handlers.TryGetValue(bot, out Handler? AchievementHandler))
+
+        if (AchievementHandler == null)
         {
-            if (AchievementHandler == null)
+            ASFLogger.LogNullError(AchievementHandler);
+            return null;
+        }
+
+        var gamesToGetAchievements = new HashSet<uint>();
+
+        foreach (string game in gameIDs)
+        {
+            if (!uint.TryParse(game, out uint gameID) || (gameID == 0))
             {
-                bot.ArchiLogger.LogNullError(AchievementHandler);
-                return null;
+                return bot.FormatBotResponse(string.Format(Strings.ErrorParsingObject, nameof(gameID)));
             }
 
-            var gamesToGetAchievements = new HashSet<uint>();
-
-            foreach (string game in gameIDs)
-            {
-                if (!uint.TryParse(game, out uint gameID) || (gameID == 0))
-                {
-                    return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorParsingObject, nameof(gameID)));
-                }
-
-                gamesToGetAchievements.Add(gameID);
-            }
-
-            var results = await Utilities.InParallel(gamesToGetAchievements.Select(appID => Task.Run(() => AchievementHandler.GetAchievementStat(bot, appID)))).ConfigureAwait(false);
-
-            List<string> responses = new(results.Where(result => !string.IsNullOrEmpty(result)));
-
-            return responses.Count > 0 ? bot.Commands.FormatBotResponse(string.Join(Environment.NewLine, responses)) : null;
-
+            gamesToGetAchievements.Add(gameID);
         }
-        else
-        {
 
-            return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, nameof(Handlers)));
-        }
+        var results = await Utilities.InParallel(gamesToGetAchievements.Select(appID => Task.Run(() => AchievementHandler.GetAchievementStat(bot, appID)))).ConfigureAwait(false);
+
+        List<string> responses = new(results.Where(result => !string.IsNullOrEmpty(result)));
+
+        return responses.Count > 0 ? bot.FormatBotResponse(string.Join(Environment.NewLine, responses)) : null;
+
+
     }
+
+    /// <summary>
+    /// 获取成就数据列表 (多个Bot)
+    /// </summary>
+    /// <param name="botNames"></param>
+    /// <param name="appid"></param>
+    /// <returns></returns>
+    internal static async Task<string?> ResponseAchievementStatList(string botNames, string appid)
+    {
+        if (string.IsNullOrEmpty(botNames))
+        {
+            throw new ArgumentNullException(nameof(botNames));
+        }
+
+        var bots = Bot.GetBots(botNames);
+
+        if (bots == null || bots.Count == 0)
+        {
+            return Commands.FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
+        }
+
+        var results = await Utilities.InParallel(bots.Select(bot => ResponseAchievementStatList(bot, appid))).ConfigureAwait(false);
+
+        List<string?> responses = new(results.Where(result => !string.IsNullOrEmpty(result)));
+
+        return responses.Count > 0 ? string.Join(Environment.NewLine, responses) : null;
+    }
+
 }

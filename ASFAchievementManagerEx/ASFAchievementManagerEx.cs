@@ -1,22 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Composition;
-using System.Threading.Tasks;
 using ArchiSteamFarm.Core;
-using ArchiSteamFarm.Steam;
-using ArchiSteamFarm.Steam.Interaction;
 using ArchiSteamFarm.Plugins.Interfaces;
-using ArchiSteamFarm.Localization;
-using SteamKit2;
-using System.Linq;
-using System.Collections.Concurrent;
+using ArchiSteamFarm.Steam;
 using ASFAchievementManagerEx.Core;
-using Newtonsoft.Json.Linq;
-using System.Text;
-using ASFAchievementManagerEx.Data;
 using ASFAchievementManagerEx.Localization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SteamKit2;
 using System.ComponentModel;
+using System.Composition;
+using System.Text;
 
 namespace ASFAchievementManagerEx;
 
@@ -185,33 +177,53 @@ public sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotCommand
             default:
                 return cmd switch
                 {
-                    "ALIST" when argLength > 2 && access >= EAccess.Master => Command.ResponseAchievementList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
-                    "ALIST" when access >= EAccess.Master => Command.ResponseAchievementList(bot, args[1]),
+                    "ALIST" when argLength > 2 && access >= EAccess.Master =>
+                        Command.ResponseAchievementList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
+                    "ALIST" when access >= EAccess.Master =>
+                        Command.ResponseAchievementList(bot, args[1]),
 
-                    "ASET" when argLength > 3 && access >= EAccess.Master => Command.ResponseAchievementSet(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), true),
-                    "ASET" when argLength > 2 && access >= EAccess.Master => Command.ResponseAchievementSet(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), true),
+                    "ASTATS" when argLength > 2 && access >= EAccess.Master =>
+                        Command.ResponseAchievementStatList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
+                    "ASTATS" when argLength > 1 && access >= EAccess.Master =>
+                        Command.ResponseAchievementStatList(bot, args[1]),
 
-                    "ARESET" when argLength > 3 && access >= EAccess.Master => Command.ResponseAchievementSet(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), false),
-                    "ARESET" when argLength > 2 && access >= EAccess.Master => Command.ResponseAchievementSet(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), false),
+                    "AUNLOCK" when argLength > 3 && access >= EAccess.Master =>
+                        Command.ResponseAchievementSet(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), true),
+                    "AUNLOCK" when argLength > 2 && access >= EAccess.Master =>
+                        Command.ResponseAchievementSet(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), true),
 
-                    "ASTATS" when argLength > 1 && access >= EAccess.Master => Command.ResponseAchievementStatList(bot, args[1]),
+                    "ALOCK" when argLength > 3 && access >= EAccess.Master =>
+                        Command.ResponseAchievementSet(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), false),
+                    "ALOCK" when argLength > 2 && access >= EAccess.Master =>
+                        Command.ResponseAchievementSet(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), false),
+
                     _ => null,
                 };
         }
     }
 
+    /// <summary>
+    /// 初始化机回调接收器
+    /// </summary>
+    /// <param name="bot"></param>
+    /// <param name="callbackManager"></param>
+    /// <returns></returns>
     public Task OnBotSteamCallbacksInit(Bot bot, CallbackManager callbackManager)
     {
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// 初始化客户端消息处理器
+    /// </summary>
+    /// <param name="bot"></param>
+    /// <returns></returns>
     public Task<IReadOnlyCollection<ClientMsgHandler>?> OnBotSteamHandlersInit(Bot bot)
     {
-        Handler CurrentBotAchievementHandler = new();
-
-        Command.Handlers.TryAdd(bot, CurrentBotAchievementHandler);
-
-        return Task.FromResult<IReadOnlyCollection<ClientMsgHandler>?>(new HashSet<ClientMsgHandler> { CurrentBotAchievementHandler });
+        var botHandler = new AchievementHandler();
+        Command.Handlers.TryAdd(bot, botHandler);
+        var handlers = new ClientMsgHandler[] { botHandler };
+        return Task.FromResult<IReadOnlyCollection<ClientMsgHandler>?>(handlers);
     }
 
     /// <summary>
