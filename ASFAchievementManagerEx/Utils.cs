@@ -2,6 +2,8 @@ using ArchiSteamFarm.Core;
 using ArchiSteamFarm.NLog;
 using ArchiSteamFarm.Steam;
 using ArchiSteamFarm.Steam.Integration;
+using ProtoBuf.Meta;
+using SteamKit2;
 using System.Reflection;
 
 namespace ASFAchievementManagerEx;
@@ -95,4 +97,30 @@ internal static class Utils
     /// <param name="b"></param>
     /// <returns></returns>
     internal static char Bool2Str(bool b) => b ? '√' : '×';
+
+    internal static KeyValue? FindByName(this KeyValue keyValue, string name)
+    {
+        return keyValue?.Children.Find(x => x.Name == name);
+    }
+
+    internal static KeyValue? FindByName(this List<KeyValue> keyValues, string name)
+    {
+        return keyValues.Find(x => x.Name == name);
+    }
+
+    internal static IEnumerable<KeyValue> FindEnumByName(this KeyValue keyValue, string name)
+    {
+        var node = keyValue.FindByName(name);
+        return node?.Children ?? Enumerable.Empty<KeyValue>();
+    }
+
+    internal static List<KeyValue>? FindListByName(this KeyValue keyValue, string name)
+    {
+        return keyValue.FindByName(name)?.Children;
+    }
+
+    internal static List<KeyValue>? FindListByName(this List< KeyValue> keyValues, string name)
+    {
+        return keyValues.FindByName(name)?.Children;
+    }
 }

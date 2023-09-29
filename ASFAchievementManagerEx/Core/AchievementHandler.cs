@@ -43,17 +43,15 @@ public sealed class AchievementHandler : ClientMsgHandler
     private List<StatData>? ParseResponse(CMsgClientGetUserStatsResponse Response)
     {
         var result = new List<StatData>();
-        var KeyValues = new KeyValue();
+        var keyValues = new KeyValue();
         if (Response.schema != null)
         {
-            using (var ms = new MemoryStream(Response.schema))
+            using var ms = new MemoryStream(Response.schema);
+            if (!keyValues.TryReadAsBinary(ms))
             {
-                if (!KeyValues.TryReadAsBinary(ms))
-                {
-                    ASFLogger.LogGenericError(string.Format(Strings.ErrorIsInvalid, nameof(Response.schema)));
-                    return null;
-                };
-            }
+                ASFLogger.LogGenericError(string.Format(Strings.ErrorIsInvalid, nameof(Response.schema)));
+                return null;
+            };
 
             var dic = new Dictionary<string, int>
             {
@@ -67,9 +65,9 @@ public sealed class AchievementHandler : ClientMsgHandler
                 {"E",0}
             };
 
-            foreach (var child in KeyValues.Children.Find(Child => Child.Name == "stats")?.Children ?? new List<KeyValue>())
+            foreach (var child in keyValues.FindEnumByName("stats"))
             {
-                var key = child.Children.Find(Child => Child.Name == "type")?.Value;
+                var key = child.FindByName("type")?.Value;
                 switch (key)
                 {
                     case "1":
@@ -87,65 +85,62 @@ public sealed class AchievementHandler : ClientMsgHandler
                 }
             }
 
-
             //first we enumerate all real achievements
-            foreach (var stat in KeyValues.Children.Find(Child => Child.Name == "stats")?.Children ?? new List<KeyValue>())
+            foreach (var stat in keyValues.FindEnumByName("stats"))
             {
-                if (stat.Children.Find(Child => Child.Name == "type")?.Value == "4")
+                if (stat.FindByName("type")?.Value == "4")
                 {
-                    foreach (var Achievement in stat.Children.Find(Child => Child.Name == "bits")?.Children ?? new List<KeyValue>())
+                    foreach (var achievement in stat.FindEnumByName("bits"))
                     {
-                        if (int.TryParse(Achievement.Name, out var bitNum))
+                        if (int.TryParse(achievement.Name, out var bitNum) && uint.TryParse(stat.Name, out var statNum))
                         {
-                            if (uint.TryParse(stat.Name, out var statNum))
+                            var stat_value = Response?.stats?.Find(x => x.stat_id == statNum)?.stat_value;
+
+                            var isSet = stat_value != null && (stat_value & (uint)1 << bitNum) != 0;
+
+                            var permission = achievement.FindByName("permission");
+
+                            var process = achievement.FindByName("process");
+                            var dependancyName = achievement.FindListByName("progress")?.FindListByName("value")?.FindByName("operand1")?.Value;
+
+                            uint.TryParse(process == null ? "0" : achievement.FindByName("progress")!.FindByName("max_val")?.Value, out var dependancyValue);
+                            var lang = CultureInfo.CurrentUICulture.EnglishName.ToLower();
+                            if (lang.IndexOf('(') > 0)
                             {
-                                var stat_value = Response?.stats?.Find(statElement => statElement.stat_id == statNum)?.stat_value;
-                                var isSet = stat_value != null && (stat_value & (uint)1 << bitNum) != 0;
-
-                                var restricted = Achievement.Children.Find(Child => Child.Name == "permission") != null;
-
-                                var dependancyName = Achievement.Children.Find(Child => Child.Name == "progress") == null ? "" : Achievement.Children.Find(Child => Child.Name == "progress")?.Children?.Find(Child => Child.Name == "value")?.Children?.Find(Child => Child.Name == "operand1")?.Value;
-
-                                uint.TryParse(Achievement.Children.Find(Child => Child.Name == "progress") == null ? "0" : Achievement.Children.Find(Child => Child.Name == "progress")!.Children.Find(Child => Child.Name == "max_val")?.Value, out var dependancyValue);
-                                var lang = CultureInfo.CurrentUICulture.EnglishName.ToLower();
-                                if (lang.IndexOf('(') > 0)
-                                {
-                                    lang = lang.Substring(0, lang.IndexOf('(') - 1);
-                                }
-                                if (Achievement.Children.Find(Child => Child.Name == "display")?.Children?.Find(Child => Child.Name == "name")?.Children?.Find(Child => Child.Name == lang) == null)
-                                {
-                                    lang = "english";//fallback to english
-                                }
-
-                                var name = Achievement.Children.Find(Child => Child.Name == "display")?.Children?.Find(Child => Child.Name == "name")?.Children?.Find(Child => Child.Name == lang)?.Value;
-                                result.Add(new StatData
-                                {
-                                    StatNum = statNum,
-                                    BitNum = bitNum,
-                                    IsSet = isSet,
-                                    Restricted = restricted,
-                                    DependancyValue = dependancyValue,
-                                    DependancyName = dependancyName,
-                                    Dependancy = 0,
-                                    Name = name,
-                                    StatValue = stat_value ?? 0
-                                });
-
-
+                                lang = lang.Substring(0, lang.IndexOf('(') - 1);
                             }
+                            if (achievement.FindByName("display")?.Children?.Find(static x => x.Name == "name")?.Children?.Find(Child => Child.Name == lang) == null)
+                            {
+                                lang = "english";//fallback to english
+                            }
+
+                            var name = achievement.FindByName("display")?.Children?.Find(static x => x.Name == "name")?.Children?.Find(Child => Child.Name == lang)?.Value;
+                            result.Add(new StatData
+                            {
+                                StatNum = statNum,
+                                BitNum = bitNum,
+                                IsSet = isSet,
+                                Restricted = permission != null,
+                                DependancyValue = dependancyValue,
+                                DependancyName = dependancyName,
+                                Dependancy = 0,
+                                Name = name,
+                                StatValue = stat_value ?? 0
+                            });
+
                         }
                     }
                 }
             }
             //Now we update all dependancies
-            foreach (var stat in KeyValues.Children.Find(Child => Child.Name == "stats")?.Children ?? new List<KeyValue>())
+            foreach (var stat in keyValues.FindEnumByName("stats"))
             {
-                if (stat.Children.Find(Child => Child.Name == "type")?.Value == "1")
+                if (stat.FindByName("type")?.Value == "1")
                 {
                     if (uint.TryParse(stat.Name, out var statNum))
                     {
-                        var restricted = stat.Children.Find(Child => Child.Name == "permission") != null;
-                        var name = stat.Children.Find(Child => Child.Name == "name")?.Value;
+                        var restricted = stat.FindByName("permission") != null;
+                        var name = stat.FindByName("name")?.Value;
                         if (name != null)
                         {
                             var ParentStat = result.Find(item => item.DependancyName == name);
@@ -182,16 +177,16 @@ public sealed class AchievementHandler : ClientMsgHandler
             }
 
             //Now we update all dependancies
-            foreach (var stat in KeyValues.Children.Find(Child => Child.Name == "stats")?.Children ?? new List<KeyValue>())
+            foreach (var stat in KeyValues.FindEnumByName("stats"))
             {
-                if (stat.Children.Find(Child => Child.Name == "type")?.Value == "1")
+                if (stat.FindByName("type")?.Value == "1")
                 {
                     if (uint.TryParse(stat.Name, out var statNum))
                     {
                         var stat_value = Response?.stats?.Find(statElement => statElement.stat_id == statNum)?.stat_value;
 
-                        var strPermission = stat.Children.Find(Child => Child.Name == "permission")?.Value;
-                        var name = stat.Children.Find(Child => Child.Name == "name")?.Value;
+                        var strPermission = stat.FindByName("permission")?.Value;
+                        var name = stat.FindByName("name")?.Value;
                         var incrementonly = stat.Children.Find(x => x.Name == "incrementonly")?.Value;
                         var display = stat.Children.Find(x => x.Name == "display")
                             ?.Children.Find(x => x.Name == "name")?.Value;
@@ -545,13 +540,13 @@ public sealed class AchievementHandler : ClientMsgHandler
         {
             SourceJobID = Client.GetNextJobID(),
             Body = {
-                    game_id =  gameID,
-                    steam_id_for_user = bot.SteamID,
-
-                },
+                game_id =  gameID,
+                steam_id_for_user = bot.SteamID,
+            },
 
 
         };
+
 
         Client.Send(request);
 
