@@ -536,13 +536,21 @@ public sealed class AchievementHandler : ClientMsgHandler
             return null;
         }
 
+
+
+
+
+
         var request = new ClientMsgProtobuf<CMsgClientGetUserStats>(EMsg.ClientGetUserStats)
         {
             SourceJobID = Client.GetNextJobID(),
             Body = {
                     game_id =  gameID,
                     steam_id_for_user = bot.SteamID,
-                }
+
+                },
+
+
         };
 
         Client.Send(request);
