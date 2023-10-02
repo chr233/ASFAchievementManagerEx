@@ -26,7 +26,6 @@ internal static class Command
         }
 
         var sb = new StringBuilder();
-        sb.AppendLine(bot.FormatBotResponse(Langs.MultipleLineResult));
 
         string[] gameIDs = appids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -38,8 +37,21 @@ internal static class Command
             }
             else
             {
-                var result = await AchievementHandler.GetAchievements(bot, gameId).ConfigureAwait(false);
-                sb.AppendLine(bot.FormatBotResponse(result));
+                var (isConnected, data) = await AchievementHandler.GetAchievements(bot, gameId).ConfigureAwait(false);
+
+                if (data?.Achievements?.Count > 0)
+                {
+                    sb.AppendLine($"App-{game} 的成就列表:");
+                    int i = 1;
+                    foreach (var achievement in data.Achievements)
+                    {
+                        sb.AppendLine(string.Format("{0,-3} {1} {2}{3}", i++, achievement.IsSet ? Static.Yes : Static.No, achievement.Name, achievement.Restricted ? Static.Warning : ""));
+                    }
+                }
+                else
+                {
+                    sb.AppendLine(bot.FormatBotResponse(isConnected ? $"未获取到 App-{game} 的成就数据" : Strings.BotNotConnected));
+                }
             }
 
             sb.AppendLine();

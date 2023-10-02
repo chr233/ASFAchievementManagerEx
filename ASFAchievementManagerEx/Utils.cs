@@ -2,7 +2,6 @@ using ArchiSteamFarm.Core;
 using ArchiSteamFarm.NLog;
 using ArchiSteamFarm.Steam;
 using ArchiSteamFarm.Steam.Integration;
-using ProtoBuf.Meta;
 using SteamKit2;
 using System.Reflection;
 
@@ -119,7 +118,7 @@ internal static class Utils
         return keyValue.FindByName(name)?.Children;
     }
 
-    internal static List<KeyValue>? FindListByName(this List< KeyValue> keyValues, string name)
+    internal static List<KeyValue>? FindListByName(this List<KeyValue> keyValues, string name)
     {
         return keyValues.FindByName(name)?.Children;
     }

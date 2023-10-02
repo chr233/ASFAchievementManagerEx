@@ -5,7 +5,6 @@ using ASFAchievementManagerEx.Core.Callbacks;
 using ASFAchievementManagerEx.Localization;
 using SteamKit2;
 using SteamKit2.Internal;
-using System.Globalization;
 using System.Text;
 
 namespace ASFAchievementManagerEx.Core;
@@ -38,189 +37,131 @@ public sealed class AchievementHandler : ClientMsgHandler
         }
     }
 
-    //Utilities
-
-    private List<StatData>? ParseResponse(CMsgClientGetUserStatsResponse Response)
+    private UserStateData? ParseResponse(CMsgClientGetUserStatsResponse payload)
     {
-        var result = new List<StatData>();
+        if (payload.schema == null)
+        {
+            ASFLogger.LogGenericError(string.Format(Strings.ErrorIsInvalid, nameof(payload.schema)));
+            return null;
+        }
+
         var keyValues = new KeyValue();
-        if (Response.schema != null)
+        using var ms = new MemoryStream(payload.schema);
+        if (!keyValues.TryReadAsBinary(ms))
         {
-            using var ms = new MemoryStream(Response.schema);
-            if (!keyValues.TryReadAsBinary(ms))
-            {
-                ASFLogger.LogGenericError(string.Format(Strings.ErrorIsInvalid, nameof(Response.schema)));
-                return null;
-            };
-
-            var dic = new Dictionary<string, int>
-            {
-                {"1",0},
-                {"2",0},
-                {"3",0},
-                {"4",0},
-                {"5",0},
-                {"6",0},
-                {"7",0},
-                {"E",0}
-            };
-
-            foreach (var child in keyValues.FindEnumByName("stats"))
-            {
-                var key = child.FindByName("type")?.Value;
-                switch (key)
-                {
-                    case "1":
-                    case "2":
-                    case "3":
-                    case "4":
-                    case "5":
-                    case "6":
-                    case "7":
-                        dic[key]++;
-                        break;
-                    default:
-                        dic["E"]++;
-                        break;
-                }
-            }
-
-            //first we enumerate all real achievements
-            foreach (var stat in keyValues.FindEnumByName("stats"))
-            {
-                if (stat.FindByName("type")?.Value == "4")
-                {
-                    foreach (var achievement in stat.FindEnumByName("bits"))
-                    {
-                        if (int.TryParse(achievement.Name, out var bitNum) && uint.TryParse(stat.Name, out var statNum))
-                        {
-                            var stat_value = Response?.stats?.Find(x => x.stat_id == statNum)?.stat_value;
-
-                            var isSet = stat_value != null && (stat_value & (uint)1 << bitNum) != 0;
-
-                            var permission = achievement.FindByName("permission");
-
-                            var process = achievement.FindByName("process");
-                            var dependancyName = achievement.FindListByName("progress")?.FindListByName("value")?.FindByName("operand1")?.Value;
-
-                            uint.TryParse(process == null ? "0" : achievement.FindByName("progress")!.FindByName("max_val")?.Value, out var dependancyValue);
-                            var lang = CultureInfo.CurrentUICulture.EnglishName.ToLower();
-                            if (lang.IndexOf('(') > 0)
-                            {
-                                lang = lang.Substring(0, lang.IndexOf('(') - 1);
-                            }
-                            if (achievement.FindByName("display")?.Children?.Find(static x => x.Name == "name")?.Children?.Find(Child => Child.Name == lang) == null)
-                            {
-                                lang = "english";//fallback to english
-                            }
-
-                            var name = achievement.FindByName("display")?.Children?.Find(static x => x.Name == "name")?.Children?.Find(Child => Child.Name == lang)?.Value;
-                            result.Add(new StatData
-                            {
-                                StatNum = statNum,
-                                BitNum = bitNum,
-                                IsSet = isSet,
-                                Restricted = permission != null,
-                                DependancyValue = dependancyValue,
-                                DependancyName = dependancyName,
-                                Dependancy = 0,
-                                Name = name,
-                                StatValue = stat_value ?? 0
-                            });
-
-                        }
-                    }
-                }
-            }
-            //Now we update all dependancies
-            foreach (var stat in keyValues.FindEnumByName("stats"))
-            {
-                if (stat.FindByName("type")?.Value == "1")
-                {
-                    if (uint.TryParse(stat.Name, out var statNum))
-                    {
-                        var restricted = stat.FindByName("permission") != null;
-                        var name = stat.FindByName("name")?.Value;
-                        if (name != null)
-                        {
-                            var ParentStat = result.Find(item => item.DependancyName == name);
-                            if (ParentStat != null)
-                            {
-                                ParentStat.Dependancy = statNum;
-                                if (restricted && !ParentStat.Restricted)
-                                {
-                                    ParentStat.Restricted = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            ASFLogger.LogGenericError(string.Format(Strings.ErrorIsInvalid, nameof(payload.schema)));
+            return null;
         }
-        return result;
-    }
 
+        var depenciesDict = new Dictionary<string, AchievementData>();
+        var achievementList = new List<AchievementData>();
 
-    private List<IntStatInfo>? ParseResponseEx(CMsgClientGetUserStatsResponse Response)
-    {
-        var result = new List<IntStatInfo>();
-        var KeyValues = new KeyValue();
-        if (Response.schema != null)
+        //first we enumerate all real achievements
+        foreach (var stat in keyValues.FindEnumByName("stats"))
         {
-            using (var ms = new MemoryStream(Response.schema))
+            if (stat.FindByName("type")?.Value == "4")
             {
-                if (!KeyValues.TryReadAsBinary(ms))
+                foreach (var bit in stat.FindEnumByName("bits"))
                 {
-                    ASFLogger.LogGenericError(string.Format(Strings.ErrorIsInvalid, nameof(Response.schema)));
-                    return null;
-                };
-            }
-
-            //Now we update all dependancies
-            foreach (var stat in KeyValues.FindEnumByName("stats"))
-            {
-                if (stat.FindByName("type")?.Value == "1")
-                {
-                    if (uint.TryParse(stat.Name, out var statNum))
+                    if (int.TryParse(bit.Name, out var bitNum) && uint.TryParse(stat.Name, out var statNum))
                     {
-                        var stat_value = Response?.stats?.Find(statElement => statElement.stat_id == statNum)?.stat_value;
+                        var stat_value = payload?.stats?.Find(x => x.stat_id == statNum)?.stat_value;
 
-                        var strPermission = stat.FindByName("permission")?.Value;
-                        var name = stat.FindByName("name")?.Value;
-                        var incrementonly = stat.Children.Find(x => x.Name == "incrementonly")?.Value;
-                        var display = stat.Children.Find(x => x.Name == "display")
-                            ?.Children.Find(x => x.Name == "name")?.Value;
-                        var id = stat.Children.Find(x => x.Name == "id")?.Value;
+                        var isSet = stat_value != null && (stat_value & (uint)1 << bitNum) != 0;
 
-                        if (!int.TryParse(strPermission, out var permission))
+                        var permission = bit.FindByName("permission");
+
+                        var process = bit.FindByName("process");
+                        var dependancyName = bit.FindListByName("progress")?.FindListByName("value")?.FindByName("operand1")?.Value;
+
+                        if (!uint.TryParse(process?.FindByName("max_val")?.Value, out var dependancyValue))
                         {
-                            permission = -999;
+                            dependancyValue = 0;
                         }
 
+                        var display = bit.FindByName("display")?.FindByName("name");
 
-                        if (name != null)
+                        var name = display?.FindByName(Langs.Language)?.Value ?? display?.FindByName("english")?.Value;
+
+                        var achievemet = new AchievementData
                         {
-                            result.Add(new IntStatInfo
-                            {
-                                Id = id ?? "",
-                                DisplayName = display ?? "",
-                                IsIncrementOnly = incrementonly == "1",
-                                Permission = permission,
-                                Value = stat_value ?? 0,
-                            });
+                            StatNum = statNum,
+                            BitNum = bitNum,
+                            IsSet = isSet,
+                            Restricted = permission != null,
+                            DependancyValue = dependancyValue,
+                            DependancyName = dependancyName,
+                            Dependancy = 0,
+                            Name = name,
+                            StatValue = stat_value ?? 0
+                        };
+
+                        achievementList.Add(achievemet);
+
+                        if (!string.IsNullOrEmpty(dependancyName))
+                        {
+                            depenciesDict.TryAdd(dependancyName, achievemet);
                         }
                     }
                 }
             }
         }
 
-        return result;
+        var statusList = new List<StatusData>();
+
+        //Now we update all dependancies
+        foreach (var stat in keyValues.FindEnumByName("stats"))
+        {
+            if (stat.FindByName("type")?.Value == "1")
+            {
+                if (uint.TryParse(stat.Name, out var statNum))
+                {
+                    var restricted = stat.FindByName("permission") != null;
+                    var name = stat.FindByName("name")?.Value;
+
+                    var stat_value = payload?.stats?.Find(statElement => statElement.stat_id == statNum)?.stat_value;
+
+                    var strPermission = stat.FindByName("permission")?.Value;
+                    var incrementonly = stat.FindByName("incrementonly")?.Value;
+                    var display = stat.FindByName("display")?.FindByName("name")?.Value;
+                    var id = stat.FindByName("id")?.Value;
+
+                    if (!int.TryParse(strPermission, out var permission))
+                    {
+                        permission = 0;
+                    }
+                    if (name != null)
+                    {
+                        if (depenciesDict.TryGetValue(name, out var parentStat))
+                        {
+                            parentStat.Dependancy = statNum;
+                            if (restricted && !parentStat.Restricted)
+                            {
+                                parentStat.Restricted = true;
+                            }
+                        }
+
+                        statusList.Add(new StatusData
+                        {
+                            Id = id ?? "",
+                            DisplayName = display ?? "",
+                            IsIncrementOnly = incrementonly == "1",
+                            Permission = permission,
+                            Value = stat_value ?? 0,
+                        });
+                    }
+                    else
+                    {
+
+                    }
+                }
+            }
+        }
+
+        return new UserStateData { Achievements = achievementList, Stats = statusList };
     }
 
-
-
-
-    private IEnumerable<CMsgClientStoreUserStats2.Stats> GetStatsToSet(List<CMsgClientStoreUserStats2.Stats> statsToSet, StatData statToSet, bool set = true)
+    private IEnumerable<CMsgClientStoreUserStats2.Stats> GetStatsToSet(List<CMsgClientStoreUserStats2.Stats> statsToSet, AchievementData statToSet, bool set = true)
     {
         if (statToSet == null)
         {
@@ -265,43 +206,31 @@ public sealed class AchievementHandler : ClientMsgHandler
 
     //Endpoints
 
-    internal async Task<string> GetAchievements(Bot bot, ulong gameID)
+    internal async Task<(bool isConnected, UserStateData? data)> GetAchievements(Bot bot, ulong gameID)
     {
         if (!Client.IsConnected)
         {
-            return bot.FormatBotResponse(Strings.BotNotConnected);
+            return (false, null);
         }
 
         var response = await GetAchievementsResponse(bot, gameID);
 
         if (response == null || response.Response == null || !response.Success)
         {
-            return "Can't retrieve achievements for " + gameID.ToString();
+            return (true, null);
         }
 
-        var sb = new StringBuilder();
-        sb.AppendLine(bot.FormatBotResponse(Langs.MultipleLineResult));
-        var Stats = ParseResponse(response.Response);
-
-        if (Stats?.Count > 0)
-        {
-            foreach (var stat in Stats)
-            {
-                sb.AppendLine(string.Format("{0,-3} {1} {2}{3}", Stats.IndexOf(stat) + 1, stat.IsSet ? Static.Yes : Static.No, stat.Name, stat.Restricted ? "\u26A0\uFE0F " : ""));
-            }
-            return sb.ToString();
-        }
-        else
-        {
-            return bot.FormatBotResponse("Can't retrieve achievements for " + gameID.ToString());
-        }
+        var data = ParseResponse(response.Response);
+        return (true, data);
     }
+
+
 
     internal async Task<string> GetAchievementStat(Bot bot, ulong gameID)
     {
         if (!Client.IsConnected)
         {
-            return bot.FormatBotResponse(Strings.BotNotConnected);
+            return Strings.BotNotConnected;
         }
 
         var response = await GetAchievementsResponse(bot, gameID);
@@ -312,7 +241,10 @@ public sealed class AchievementHandler : ClientMsgHandler
         }
 
         var responses = new List<string>();
-        var Stats = ParseResponseEx(response.Response);
+        var data = ParseResponse(response.Response);
+        var Stats = data?.Stats;
+
+
         if (Stats == null)
         {
             bot.ArchiLogger.LogNullError(Stats);
@@ -335,7 +267,7 @@ public sealed class AchievementHandler : ClientMsgHandler
     {
         if (!Client.IsConnected)
         {
-            return bot.FormatBotResponse(Strings.BotNotConnected);
+            return Strings.BotNotConnected;
         }
 
         var responses = new List<string>();
@@ -351,14 +283,17 @@ public sealed class AchievementHandler : ClientMsgHandler
         {
             bot.ArchiLogger.LogNullError(response.Response);
             responses.Add(Strings.WarningFailed);
-            return "" + string.Join(Environment.NewLine, responses);
+            return string.Join(Environment.NewLine, responses);
         }
 
-        var Stats = ParseResponse(response.Response);
+        var data = ParseResponse(response.Response);
+        var Stats = data?.Achievements;
+
+
         if (Stats == null)
         {
             responses.Add(Strings.WarningFailed);
-            return "" + string.Join(Environment.NewLine, responses);
+            return string.Join(Environment.NewLine, responses);
         }
 
         var statsToSet = new List<CMsgClientStoreUserStats2.Stats>();
@@ -429,7 +364,7 @@ public sealed class AchievementHandler : ClientMsgHandler
     {
         if (!Client.IsConnected)
         {
-            return bot.FormatBotResponse(Strings.BotNotConnected);
+            return Strings.BotNotConnected;
         }
 
         var responses = new List<string>();
@@ -453,7 +388,9 @@ public sealed class AchievementHandler : ClientMsgHandler
             return "\u200B\n" + string.Join(Environment.NewLine, responses);
         }
 
-        var Stats = ParseResponse(response.Response);
+        var data = ParseResponse(response.Response);
+        var Stats = data?.Achievements;
+
         if (Stats == null)
         {
             responses.Add(Strings.WarningFailed);
