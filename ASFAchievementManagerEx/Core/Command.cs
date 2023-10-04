@@ -37,20 +37,21 @@ internal static class Command
             }
             else
             {
-                var (isConnected, data) = await AchievementHandler.GetAchievements(bot, gameId).ConfigureAwait(false);
+                var userStates = await AchievementHandler.GetUserStates(bot, gameId).ConfigureAwait(false);
+                var achievements = userStates?.Achievements;
 
-                if (data?.Achievements?.Count > 0)
+                if (achievements?.Count > 0)
                 {
                     sb.AppendLine($"App-{game} 的成就列表:");
                     int i = 1;
-                    foreach (var achievement in data.Achievements)
+                    foreach (var achievement in achievements)
                     {
-                        sb.AppendLine(string.Format("{0,-3} {1} {2}{3}", i++, achievement.IsSet ? Static.Yes : Static.No, achievement.Name, achievement.Restricted ? Static.Warning : ""));
+                        sb.AppendLine(string.Format("{0,-3} {1} {2}{3}", i++, achievement.IsUnlock ? Static.Yes : Static.No, achievement.Name, achievement.Restricted ? Static.Warning : ""));
                     }
                 }
                 else
                 {
-                    sb.AppendLine(bot.FormatBotResponse(isConnected ? $"未获取到 App-{game} 的成就数据" : Strings.BotNotConnected));
+                    sb.AppendLine(bot.FormatBotResponse(bot.IsConnectedAndLoggedOn ? $"未获取到 App-{game} 的成就数据" : Strings.BotNotConnected));
                 }
             }
 
@@ -81,8 +82,7 @@ internal static class Command
         }
 
         var results = await Utilities.InParallel(bots.Select(bot => ResponseAchievementList(bot, appids))).ConfigureAwait(false);
-
-        List<string?> responses = new(results.Where(result => !string.IsNullOrEmpty(result)));
+        var responses = new List<string?>(results.Where(result => !string.IsNullOrEmpty(result)));
 
         return responses.Count > 0 ? string.Join(Environment.NewLine, responses) : null;
     }
@@ -93,9 +93,9 @@ internal static class Command
     /// <param name="bot"></param>
     /// <param name="appid"></param>
     /// <param name="achievementNumbers"></param>
-    /// <param name="set"></param>
+    /// <param name="unlock"></param>
     /// <returns></returns>
-    internal static async Task<string?> ResponseAchievementSet(Bot bot, string appid, string achievementNumbers, bool set = true)
+    internal static async Task<string?> ResponseAchievementSet(Bot bot, string appid, string achievementNumbers, bool unlock = true)
     {
         if (string.IsNullOrEmpty(achievementNumbers))
         {
@@ -133,7 +133,7 @@ internal static class Command
                 return bot.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, "Achievements list"));
             }
         }
-        return bot.FormatBotResponse(await Task.Run(() => AchievementHandler.SetAchievements(bot, appId, achievements, set)).ConfigureAwait(false));
+        return bot.FormatBotResponse(await Task.Run(() => AchievementHandler.SetAchievements(bot, appId, achievements, unlock)).ConfigureAwait(false));
     }
 
     /// <summary>
