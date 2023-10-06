@@ -43,10 +43,11 @@ internal static class Command
                 if (achievements?.Count > 0)
                 {
                     sb.AppendLine($"App-{game} 的成就列表:");
-                    int i = 1;
+
+                    var id = 1;
                     foreach (var achievement in achievements)
                     {
-                        sb.AppendLine(string.Format("{0,-3} {1} {2}{3}", i++, achievement.IsUnlock ? Static.Yes : Static.No, achievement.Name, achievement.Restricted ? Static.Warning : ""));
+                        sb.AppendLine(string.Format("{0,-3} {1} {2}{3}", id++, achievement.IsUnlock ? Static.Yes : Static.No, achievement.Name, achievement.Restricted ? Static.Warning : ""));
                     }
                 }
                 else
@@ -121,7 +122,7 @@ internal static class Command
         {
             foreach (string achievement in achievementStrings)
             {
-                if (!uint.TryParse(achievement, out uint achievementNumber) || (achievementNumber == 0))
+                if (!uint.TryParse(achievement, out var achievementNumber) || (achievementNumber == 0))
                 {
                     return bot.FormatBotResponse(string.Format(Strings.ErrorParsingObject, achievement));
                 }
@@ -183,38 +184,40 @@ internal static class Command
             return null;
         }
 
-        var gameIDs = appids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+        var sb = new StringBuilder();
 
-        if (gameIDs.Length == 0)
-        {
-            return bot.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, nameof(gameIDs)));
-        }
-
-        if (AchievementHandler == null)
-        {
-            ASFLogger.LogNullError(AchievementHandler);
-            return null;
-        }
-
-        var gamesToGetAchievements = new HashSet<uint>();
+        string[] gameIDs = appids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
         foreach (string game in gameIDs)
         {
-            if (!uint.TryParse(game, out uint gameID) || (gameID == 0))
+            if (!uint.TryParse(game, out uint gameId) || (gameId == 0))
             {
-                return bot.FormatBotResponse(string.Format(Strings.ErrorParsingObject, nameof(gameID)));
+                sb.AppendLine(bot.FormatBotResponse(string.Format(Strings.ErrorIsInvalid, nameof(gameId))));
+            }
+            else
+            {
+                var userStates = await AchievementHandler.GetUserStates(bot, gameId).ConfigureAwait(false);
+                var statDict = userStates?.Stats;
+
+                if (statDict?.Count > 0)
+                {
+                    sb.AppendLine($"App-{game} 的成就数据列表:");
+
+                    foreach (var (id, stat) in statDict)
+                    {
+                        sb.AppendLine(string.Format("{0,-3} {1}", id, stat));
+                    }
+                }
+                else
+                {
+                    sb.AppendLine(bot.FormatBotResponse(bot.IsConnectedAndLoggedOn ? $"未获取到 App-{game} 的成就数据" : Strings.BotNotConnected));
+                }
             }
 
-            gamesToGetAchievements.Add(gameID);
+            sb.AppendLine();
         }
 
-        var results = await Utilities.InParallel(gamesToGetAchievements.Select(appID => Task.Run(() => AchievementHandler.GetAchievementStat(bot, appID)))).ConfigureAwait(false);
-
-        List<string> responses = new(results.Where(result => !string.IsNullOrEmpty(result)));
-
-        return responses.Count > 0 ? bot.FormatBotResponse(string.Join(Environment.NewLine, responses)) : null;
-
-
+        return sb.Length > 0 ? sb.ToString() : null;
     }
 
     /// <summary>

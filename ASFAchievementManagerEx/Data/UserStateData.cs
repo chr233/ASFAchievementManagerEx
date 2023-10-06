@@ -6,7 +6,7 @@ namespace ASFAchievementManagerEx.Data;
 internal sealed record UserStateData
 {
     public IList<AchievementData>? Achievements { get; set; }
-    public IList<StatsData>? Stats { get; set; }
+    public IDictionary<uint, StatsData>? Stats { get; set; }
 }
 
 /// <summary>
@@ -14,7 +14,7 @@ internal sealed record UserStateData
 /// </summary>
 internal sealed record AchievementData
 {
-    public uint StatNum { get; set; }
+    public uint StatId { get; set; }
     public int BitNum { get; set; }
     public bool IsUnlock { get; set; }
     public bool Restricted { get; set; }
@@ -30,7 +30,7 @@ internal sealed record AchievementData
 /// </summary>
 internal record StatsData
 {
-    public int Id { get; set; }
+    public uint Id { get; set; }
     public string Name { get; set; } = "";
 
     /// <summary>

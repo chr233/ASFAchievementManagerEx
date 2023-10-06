@@ -128,4 +128,10 @@ internal static class Utils
         var strValue = keyValue.FindByName(name)?.Value;
         return int.TryParse(strValue, out var value) ? value : defaultValue;
     }
+
+    internal static uint ReadAsUInt(this KeyValue keyValue, string name, uint defaultValue = 0)
+    {
+        var strValue = keyValue.FindByName(name)?.Value;
+        return uint.TryParse(strValue, out var value) ? value : defaultValue;
+    }
 }

@@ -5,6 +5,7 @@ using ASFAchievementManagerEx.Core.Callbacks;
 using ASFAchievementManagerEx.Localization;
 using SteamKit2;
 using SteamKit2.Internal;
+using System.Collections.Generic;
 using System.Text;
 
 namespace ASFAchievementManagerEx.Core;
@@ -93,24 +94,21 @@ public sealed class AchievementHandler : ClientMsgHandler
         //first we enumerate all real achievements
         foreach (var stat in keyValues.FindEnumByName("stats"))
         {
-            if (stat.FindByName("type")?.Value == "4")
+            if (stat.ReadAsInt("type") == 4)
             {
                 foreach (var bit in stat.FindEnumByName("bits"))
                 {
-                    if (int.TryParse(bit.Name, out var bitNum) && uint.TryParse(stat.Name, out var statNum))
+                    if (int.TryParse(bit.Name, out var bitNum) && uint.TryParse(stat.Name, out var statId))
                     {
-                        var statValue = payload?.stats?.Find(x => x.stat_id == statNum)?.stat_value ?? 0;
-                        var isUnlock = (statValue & (uint)1 << bitNum) != 0;
+                        var statValue = payload?.stats?.Find(x => x.stat_id == statId)?.stat_value ?? 0;
+                        var isUnlock = (statValue & ((uint)1 << bitNum)) != 0;
 
                         var permission = bit.FindByName("permission");
 
                         var process = bit.FindByName("process");
                         var dependancyName = bit.FindListByName("progress")?.FindListByName("value")?.FindByName("operand1")?.Value;
 
-                        if (!uint.TryParse(process?.FindByName("max_val")?.Value, out var dependancyValue))
-                        {
-                            dependancyValue = 0;
-                        }
+                        var dependancyValue = process?.ReadAsUInt("max_val") ?? 0;
 
                         var display = bit.FindByName("display")?.FindByName("name");
 
@@ -118,7 +116,7 @@ public sealed class AchievementHandler : ClientMsgHandler
 
                         var achievemet = new AchievementData
                         {
-                            StatNum = statNum,
+                            StatId = statId,
                             BitNum = bitNum,
                             IsUnlock = isUnlock,
                             Restricted = permission != null,
@@ -140,14 +138,14 @@ public sealed class AchievementHandler : ClientMsgHandler
             }
         }
 
-        var statusList = new List<StatsData>();
+        var statusDict = new Dictionary<uint, StatsData>();
 
         var tmps = new List<KeyValue>();
 
         //Now we update all dependancies
         foreach (var stat in keyValues.FindEnumByName("stats"))
         {
-            if (stat.FindByName("type")?.Value == "1")
+            if (stat.ReadAsInt("type", 0) == 1)
             {
                 if (uint.TryParse(stat.Name, out var statNum))
                 {
@@ -158,9 +156,13 @@ public sealed class AchievementHandler : ClientMsgHandler
                     }
 
 
-                    var id = stat.ReadAsInt("id");
+                    var id = stat.ReadAsUInt("id", 0);
 
                     var name = stat.FindByName("name")?.Value;
+                    if (string.IsNullOrEmpty(name))
+                    {
+                        continue;
+                    }
 
                     statsDict.TryGetValue(statNum, out var statValue);
 
@@ -175,53 +177,46 @@ public sealed class AchievementHandler : ClientMsgHandler
                     var display = stat.FindByName("display")?.FindByName("name")?.Value;
 
 
-                    if (name != null)
+                    if (depenciesDict.TryGetValue(name, out var parentStat))
                     {
-                        if (depenciesDict.TryGetValue(name, out var parentStat))
+                        parentStat.Dependancy = statNum;
+                        if (restricted && !parentStat.Restricted)
                         {
-                            parentStat.Dependancy = statNum;
-                            if (restricted && !parentStat.Restricted)
-                            {
-                                parentStat.Restricted = true;
-                            }
+                            parentStat.Restricted = true;
                         }
-
-                        statusList.Add(new StatsData
-                        {
-                            Id = id,
-                            Name = display ?? "",
-                            IsIncrementOnly = isIncrementonly,
-                            Permission = permission,
-                            Value = statValue,
-                            Default = def,
-                            MaxChange = maxChange,
-                            Min = min,
-                        });
                     }
-                    else
-                    {
 
+                    var statData = new StatsData
+                    {
+                        Id = id,
+                        Name = display ?? "",
+                        IsIncrementOnly = isIncrementonly,
+                        Permission = permission,
+                        Value = statValue,
+                        Default = def,
+                        MaxChange = maxChange,
+                        Min = min,
+                    };
+
+                    if (!statusDict.TryAdd(id, statData))
+                    {
+                        ASFLogger.LogGenericWarning("id重复");
                     }
                 }
             }
         }
 
-        return new UserStateData { Achievements = achievementList, Stats = statusList };
+        return new UserStateData { Achievements = achievementList, Stats = statusDict };
     }
 
     private IEnumerable<CMsgClientStoreUserStats2.Stats> GetStatsToSet(List<CMsgClientStoreUserStats2.Stats> statsToSet, AchievementData statToSet, bool set = true)
     {
-        if (statToSet == null)
-        {
-            yield break; //it should never happen
-        }
-
-        var currentstat = statsToSet.Find(stat => stat.stat_id == statToSet.StatNum);
+        var currentstat = statsToSet.Find(stat => stat.stat_id == statToSet.StatId);
         if (currentstat == null)
         {
             currentstat = new CMsgClientStoreUserStats2.Stats()
             {
-                stat_id = statToSet.StatNum,
+                stat_id = statToSet.StatId,
                 stat_value = statToSet.StatValue
             };
             yield return currentstat;
@@ -282,15 +277,15 @@ public sealed class AchievementHandler : ClientMsgHandler
         }
         else
         {
-            foreach (var stat in Stats)
+            foreach (var (id, stat) in Stats)
             {
-                responses.Add(string.Format("{0,-5} {1}", Stats.IndexOf(stat) + 1, stat.ToString()));
+                responses.Add(string.Format("{0,-5} {1}", id + 1, stat.ToString()));
             }
         }
         return responses.Count > 0 ? "\u200B\nAchievements for " + gameID.ToString() + ":\n" + string.Join(Environment.NewLine, responses) : "Can't retrieve achievements for " + gameID.ToString();
     }
 
-    internal async Task<string> SetAchievementsStats(Bot bot, uint appId, HashSet<uint> achievements, bool set = true)
+    internal async Task<string> SetAchievementsStats(Bot bot, uint appId, HashSet<uint> achievementIds, bool set = true)
     {
         if (!Client.IsConnected)
         {
@@ -300,10 +295,10 @@ public sealed class AchievementHandler : ClientMsgHandler
         var responses = new List<string>();
 
         var (data, crc_stats) = await GetAchievementsResponse(bot, appId);
-        var Stats = data?.Achievements;
+        var achievementList = data?.Achievements;
 
 
-        if (Stats == null)
+        if (achievementList == null)
         {
             responses.Add(Strings.WarningFailed);
             return "Can't retrieve achievements for " + appId.ToString(); ;
@@ -311,35 +306,42 @@ public sealed class AchievementHandler : ClientMsgHandler
 
         var statsToSet = new List<CMsgClientStoreUserStats2.Stats>();
 
-        if (achievements.Count == 0)
+        if (achievementIds.Count == 0)
         {
-            foreach (var stat in Stats.Where(s => !s.Restricted))
+            foreach (var stat in achievementList)
             {
-                statsToSet.AddRange(GetStatsToSet(statsToSet, stat, set));
+                if (!stat.Restricted)
+                {
+                    statsToSet.AddRange(GetStatsToSet(statsToSet, stat, set));
+                }
             }
         }
         else
         {
-            foreach (var achievement in achievements)
+            foreach (var achievementId in achievementIds)
             {
-                if (Stats.Count < achievement)
+                if (achievementList.Count < achievementId)
                 {
-                    responses.Add("Achievement #" + achievement.ToString() + " is out of range");
+                    responses.Add($"Achievement #{achievementId} not found");
                     continue;
                 }
 
-                if (Stats[(int)achievement - 1].IsUnlock == set)
-                {
-                    responses.Add("Achievement #" + achievement.ToString() + " is already " + (set ? "unlocked" : "locked"));
-                    continue;
-                }
-                if (Stats[(int)achievement - 1].Restricted)
-                {
-                    responses.Add("Achievement #" + achievement.ToString() + " is protected and can't be switched");
-                    continue;
-                }
+                var stat = achievementList[(int)achievementId - 1];
 
-                statsToSet.AddRange(GetStatsToSet(statsToSet, Stats[(int)achievement - 1], set));
+                if (stat.IsUnlock == set)
+                {
+                    responses.Add($"Achievement #{achievementId} is already {(set ? "unlocked" : "locked")}");
+                    continue;
+                }
+                else if (stat.Restricted)
+                {
+                    responses.Add($"Achievement #{achievementId} is protected and can't be switched");
+                    continue;
+                }
+                else
+                {
+                    statsToSet.AddRange(GetStatsToSet(statsToSet, stat, set));
+                }
             }
         }
 
@@ -347,7 +349,7 @@ public sealed class AchievementHandler : ClientMsgHandler
         {
             responses.Add(Strings.WarningFailed);
             return "\u200B\n" + string.Join(Environment.NewLine, responses);
-        };
+        }
         if (responses.Count > 0)
         {
             responses.Add("Trying to switch remaining achievements..."); //if some errors occured
@@ -373,7 +375,7 @@ public sealed class AchievementHandler : ClientMsgHandler
     }
 
 
-    internal async Task<string> SetAchievements(Bot bot, uint appId, HashSet<uint> achievements, bool set = true)
+    internal async Task<string> SetAchievements(Bot bot, uint appId, HashSet<uint> achievementIds, bool set = true)
     {
         var responses = new List<string>();
 
@@ -384,45 +386,53 @@ public sealed class AchievementHandler : ClientMsgHandler
             return "Can't retrieve achievements for " + appId.ToString(); ;
         }
 
-        var Stats = data?.Achievements;
+        var achievementList = data?.Achievements;
 
-        if (Stats == null)
+        if (achievementList == null)
         {
             responses.Add(Strings.WarningFailed);
-            return "\u200B\n" + string.Join(Environment.NewLine, responses);
+            return "Can't retrieve achievements for " + appId.ToString(); ;
         }
 
         var statsToSet = new List<CMsgClientStoreUserStats2.Stats>();
 
-        if (achievements.Count == 0)
+
+        if (achievementIds.Count == 0)
         {
-            foreach (var stat in Stats.Where(s => !s.Restricted))
+            foreach (var stat in achievementList)
             {
-                statsToSet.AddRange(GetStatsToSet(statsToSet, stat, set));
+                if (!stat.Restricted)
+                {
+                    statsToSet.AddRange(GetStatsToSet(statsToSet, stat, set));
+                }
             }
         }
         else
         {
-            foreach (var achievement in achievements)
+            foreach (var achievementId in achievementIds)
             {
-                if (Stats.Count < achievement)
+                if (achievementList.Count < achievementId)
                 {
-                    responses.Add("Achievement #" + achievement.ToString() + " is out of range");
+                    responses.Add($"Achievement #{achievementId} not found");
                     continue;
                 }
 
-                if (Stats[(int)achievement - 1].IsUnlock == set)
-                {
-                    responses.Add("Achievement #" + achievement.ToString() + " is already " + (set ? "unlocked" : "locked"));
-                    continue;
-                }
-                if (Stats[(int)achievement - 1].Restricted)
-                {
-                    responses.Add("Achievement #" + achievement.ToString() + " is protected and can't be switched");
-                    continue;
-                }
+                var stat = achievementList[(int)achievementId - 1];
 
-                statsToSet.AddRange(GetStatsToSet(statsToSet, Stats[(int)achievement - 1], set));
+                if (stat.IsUnlock == set)
+                {
+                    responses.Add($"Achievement #{achievementId} is already {(set ? "unlocked" : "locked")}");
+                    continue;
+                }
+                else if (stat.Restricted)
+                {
+                    responses.Add($"Achievement #{achievementId} is protected and can't be switched");
+                    continue;
+                }
+                else
+                {
+                    statsToSet.AddRange(GetStatsToSet(statsToSet, stat, set));
+                }
             }
         }
 

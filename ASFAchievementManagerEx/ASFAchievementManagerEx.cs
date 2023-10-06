@@ -167,39 +167,35 @@ public sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotCommand
         }
 
         var argLength = args.Length;
-        switch (argLength)
+        return argLength switch
         {
-            case 0:
-                throw new InvalidOperationException(nameof(args));
-            case 1:
-                return null;
+            0 => throw new InvalidOperationException(nameof(args)),
+            1 => null,
+            _ => cmd switch
+            {
+                "ALIST" when argLength > 2 && access >= EAccess.Master =>
+                    Command.ResponseAchievementList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
+                "ALIST" when access >= EAccess.Master =>
+                    Command.ResponseAchievementList(bot, args[1]),
 
-            default:
-                return cmd switch
-                {
-                    "ALIST" when argLength > 2 && access >= EAccess.Master =>
-                        Command.ResponseAchievementList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
-                    "ALIST" when access >= EAccess.Master =>
-                        Command.ResponseAchievementList(bot, args[1]),
+                "ASTATS" when argLength > 2 && access >= EAccess.Master =>
+                    Command.ResponseAchievementStatList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
+                "ASTATS" when argLength > 1 && access >= EAccess.Master =>
+                    Command.ResponseAchievementStatList(bot, args[1]),
 
-                    "ASTATS" when argLength > 2 && access >= EAccess.Master =>
-                        Command.ResponseAchievementStatList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
-                    "ASTATS" when argLength > 1 && access >= EAccess.Master =>
-                        Command.ResponseAchievementStatList(bot, args[1]),
+                "AUNLOCK" when argLength > 3 && access >= EAccess.Master =>
+                     Command.ResponseAchievementSet(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), true),
+                "AUNLOCK" when argLength > 2 && access >= EAccess.Master =>
+                    Command.ResponseAchievementSet(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), true),
 
-                    "AUNLOCK" when argLength > 3 && access >= EAccess.Master =>
-                        Command.ResponseAchievementSet(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), true),
-                    "AUNLOCK" when argLength > 2 && access >= EAccess.Master =>
-                        Command.ResponseAchievementSet(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), true),
+                "ALOCK" when argLength > 3 && access >= EAccess.Master =>
+                    Command.ResponseAchievementSet(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), false),
+                "ALOCK" when argLength > 2 && access >= EAccess.Master =>
+                    Command.ResponseAchievementSet(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), false),
 
-                    "ALOCK" when argLength > 3 && access >= EAccess.Master =>
-                        Command.ResponseAchievementSet(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), false),
-                    "ALOCK" when argLength > 2 && access >= EAccess.Master =>
-                        Command.ResponseAchievementSet(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), false),
-
-                    _ => null,
-                };
-        }
+                _ => null,
+            },
+        };
     }
 
     /// <summary>
