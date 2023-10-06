@@ -340,7 +340,8 @@ public sealed class AchievementHandler : ClientMsgHandler
                 }
                 else
                 {
-                    statsToSet.AddRange(GetStatsToSet(statsToSet, stat, set));
+                    var tmp = GetStatsToSet(statsToSet, stat, set);
+                    statsToSet.AddRange(tmp);
                 }
             }
         }
