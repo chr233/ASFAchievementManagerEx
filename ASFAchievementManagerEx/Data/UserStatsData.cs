@@ -2,8 +2,7 @@ using System.Security;
 
 namespace ASFAchievementManagerEx.Data;
 
-
-internal sealed record UserStateData
+internal sealed record UserStatsData
 {
     public IList<AchievementData>? Achievements { get; set; }
     public IDictionary<uint, StatsData>? Stats { get; set; }
@@ -15,9 +14,10 @@ internal sealed record UserStateData
 internal sealed record AchievementData
 {
     public uint StatId { get; set; }
-    public int BitNum { get; set; }
+    public int Bit { get; set; }
     public bool IsUnlock { get; set; }
-    public bool Restricted { get; set; }
+    public int Permission { get; set; }
+    public bool IsProtected => (Permission & 2) != 0;
     public uint Dependancy { get; set; }
     public uint DependancyValue { get; set; }
     public string? DependancyName { get; set; }
@@ -42,7 +42,9 @@ internal record StatsData
     public int Permission { get; set; }
     public uint Value { get; set; }
     public int Default { get; set; }
-    public int MaxChange { get; set; }
-    public int Min { get; set; }
-    public int Max { get; set; }
+    public int? MaxChange { get; set; }
+    public uint? Min { get; set; }
+    public uint? Max { get; set; }
+
+    public string StrValue => string.Format("{0} {1} {2}", Min != null ? Min.ToString() : "-", Value, Max != null ? Max.ToString() : "-");
 }

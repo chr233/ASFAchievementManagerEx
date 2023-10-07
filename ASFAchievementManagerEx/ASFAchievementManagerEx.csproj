@@ -13,6 +13,7 @@
 
 	<ItemGroup>
 	  <Using Include="ASFAchievementManagerEx.Data" />
+	  <Using Include="ASFAchievementManagerEx.Localization" />
 	  <Using Include="ASFAchievementManagerEx.Utils">
 	    <Static>True</Static>
 	  </Using>

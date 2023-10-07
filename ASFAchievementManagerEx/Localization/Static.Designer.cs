@@ -70,6 +70,15 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
+        ///   查找类似 🔼 的本地化字符串。
+        /// </summary>
+        internal static string IncrementOnly {
+            get {
+                return ResourceManager.GetString("IncrementOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 ========================================== 的本地化字符串。
         /// </summary>
         internal static string Line {
@@ -79,7 +88,19 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
-        ///   查找类似 ASFAchievementManagerEx 的本地化字符串。
+        ///   查找类似 🔒 的本地化字符串。
+        /// </summary>
+        internal static string Lock {
+            get {
+                return ResourceManager.GetString("Lock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ┏┓┏┓┏┓┏┓ ┓ •              ┳┳┓            ┏┓  
+        ///┣┫┗┓┣ ┣┫┏┣┓┓┏┓┓┏┏┓┏┳┓┏┓┏┓╋┃┃┃┏┓┏┓┏┓┏┓┏┓┏┓┣ ┓┏
+        ///┛┗┗┛┻ ┛┗┗┛┗┗┗ ┗┛┗ ┛┗┗┗ ┛┗┗┛ ┗┗┻┛┗┗┻┗┫┗ ┛ ┗┛┛┗
+        ///                                    ┛ 的本地化字符串。
         /// </summary>
         internal static string Logo {
             get {

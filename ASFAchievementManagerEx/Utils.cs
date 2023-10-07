@@ -123,10 +123,22 @@ internal static class Utils
         return keyValues.FindByName(name)?.Children;
     }
 
+    internal static int? ReadAsInt(this KeyValue keyValue, string name)
+    {
+        var strValue = keyValue.FindByName(name)?.Value;
+        return int.TryParse(strValue, out var value) ? value : null;
+    }
+
     internal static int ReadAsInt(this KeyValue keyValue, string name, int defaultValue = 0)
     {
         var strValue = keyValue.FindByName(name)?.Value;
         return int.TryParse(strValue, out var value) ? value : defaultValue;
+    }
+
+    internal static uint? ReadAsUInt(this KeyValue keyValue, string name)
+    {
+        var strValue = keyValue.FindByName(name)?.Value;
+        return uint.TryParse(strValue, out var value) ? value : null;
     }
 
     internal static uint ReadAsUInt(this KeyValue keyValue, string name, uint defaultValue = 0)

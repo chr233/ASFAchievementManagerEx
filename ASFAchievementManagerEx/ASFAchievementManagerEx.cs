@@ -13,10 +13,13 @@ using System.Text;
 namespace ASFAchievementManagerEx;
 
 [Export(typeof(IPlugin))]
-public sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotCommand2
+internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotCommand2
 {
     public string Name => "ASF Achievemenevement Manager Ex";
     public Version Version => MyVersion;
+
+    [JsonProperty]
+    public static PluginConfig Config => Utils.Config;
 
     private static Timer? StatisticTimer;
 
@@ -53,7 +56,7 @@ public sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotCommand
             }
         }
 
-        Config = config ?? new();
+        Utils.Config = config ?? new();
 
         //使用协议
         if (!Config.EULA)
@@ -108,6 +111,7 @@ public sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotCommand
         message.AppendLine(string.Format(Langs.PluginVer, nameof(ASFAchievementManagerEx), MyVersion.ToString()));
         message.AppendLine(Langs.PluginContact);
         message.AppendLine(Langs.PluginInfo);
+
         message.AppendLine(Static.Line);
 
         var pluginFolder = Path.GetDirectoryName(MyLocation) ?? ".";
@@ -170,28 +174,60 @@ public sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotCommand
         return argLength switch
         {
             0 => throw new InvalidOperationException(nameof(args)),
-            1 => null,
+            1 => cmd switch
+            {
+                //Update
+                "ASFENHANCE" when access >= EAccess.FamilySharing =>
+                    Task.FromResult(Update.Command.ResponseASFEnhanceVersion()),
+                "AAM" when access >= EAccess.FamilySharing =>
+                    Task.FromResult(Update.Command.ResponseASFEnhanceVersion()),
+
+                "ASFEVERSION" when access >= EAccess.Operator =>
+                    Update.Command.ResponseCheckLatestVersion(),
+                "AV" when access >= EAccess.Operator =>
+                    Update.Command.ResponseCheckLatestVersion(),
+
+                "ASFEUPDATE" when access >= EAccess.Owner =>
+                    Update.Command.ResponseUpdatePlugin(),
+                "AU" when access >= EAccess.Owner =>
+                    Update.Command.ResponseUpdatePlugin(),
+
+                _ => null,
+            },
             _ => cmd switch
             {
                 "ALIST" when argLength > 2 && access >= EAccess.Master =>
-                    Command.ResponseAchievementList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
+                    Command.ResponseGetAchievementList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
                 "ALIST" when access >= EAccess.Master =>
-                    Command.ResponseAchievementList(bot, args[1]),
+                    Command.ResponseGetAchievementList(bot, args[1]),
 
                 "ASTATS" when argLength > 2 && access >= EAccess.Master =>
-                    Command.ResponseAchievementStatList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
+                    Command.ResponseGetStatsList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
                 "ASTATS" when argLength > 1 && access >= EAccess.Master =>
-                    Command.ResponseAchievementStatList(bot, args[1]),
+                    Command.ResponseGetStatsList(bot, args[1]),
 
+                "ASET" when argLength > 3 && access >= EAccess.Master =>
+                    Command.ResponseSetAchievement(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), true),
                 "AUNLOCK" when argLength > 3 && access >= EAccess.Master =>
-                     Command.ResponseAchievementSet(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), true),
+                     Command.ResponseSetAchievement(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), true),
+                "ASET" when argLength > 2 && access >= EAccess.Master =>
+                    Command.ResponseSetAchievement(bot, args[2], Utilities.GetArgsAsText(args, 2, ","), true),
                 "AUNLOCK" when argLength > 2 && access >= EAccess.Master =>
-                    Command.ResponseAchievementSet(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), true),
+                    Command.ResponseSetAchievement(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), true),
 
+                "ARESET" when argLength > 3 && access >= EAccess.Master =>
+                    Command.ResponseSetAchievement(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), false),
                 "ALOCK" when argLength > 3 && access >= EAccess.Master =>
-                    Command.ResponseAchievementSet(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), false),
+                    Command.ResponseSetAchievement(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), false),
+                "ARESET" when argLength > 2 && access >= EAccess.Master =>
+                    Command.ResponseSetAchievement(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), false),
                 "ALOCK" when argLength > 2 && access >= EAccess.Master =>
-                    Command.ResponseAchievementSet(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), false),
+                    Command.ResponseSetAchievement(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), false),
+
+                "AEDIT" when argLength > 3 && access >= EAccess.Master =>
+                    Command.ResponseSetStats(args[1], args[2], Utilities.GetArgsAsText(args, 3, ",")),
+                "AEDIT" when argLength > 2 && access >= EAccess.Master =>
+                    Command.ResponseSetStats(bot, args[2], Utilities.GetArgsAsText(args, 2, ",")),
 
                 _ => null,
             },
@@ -254,7 +290,7 @@ public sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotCommand
         }
         catch (Exception ex)
         {
-            var version = await bot.Commands.Response(EAccess.Owner, "VERSION") ?? Langs.AccountSubUnknown;
+            var version = await bot.Commands.Response(EAccess.Owner, "VERSION") ?? "UNKNOWN";
             var i = version.LastIndexOf('V');
             if (i >= 0)
             {
