@@ -37,7 +37,7 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
         {
             foreach ((string configProperty, JToken configValue) in additionalConfigProperties)
             {
-                if (configProperty == "ASFEnhance" && configValue.Type == JTokenType.Object)
+                if (configProperty == "ASFAchievementManagerEx" && configValue.Type == JTokenType.Object)
                 {
                     try
                     {
@@ -62,7 +62,7 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
         {
             sb.AppendLine();
             sb.AppendLine(Static.Line);
-            sb.AppendLine(Langs.EulaWarning);
+            sb.AppendLineFormat(Langs.EulaWarning, nameof(ASFAchievementManagerEx));
             sb.AppendLine(Static.Line);
         }
 
@@ -273,17 +273,19 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
             throw new InvalidEnumArgumentException(nameof(access), (int)access, typeof(EAccess));
         }
 
-        if (!Config.EULA)
-        {
-            return FormatStaticResponse(Langs.EulaCmdUnavilable);
-        }
-
         try
         {
             var task = ResponseCommand(bot, access, args);
             if (task != null)
             {
-                return await task.ConfigureAwait(false);
+                if (Config.EULA)
+                {
+                    return await task.ConfigureAwait(false);
+                }
+                else
+                {
+                    return FormatStaticResponse(Langs.EulaCmdUnavilable);
+                }
             }
             else
             {

@@ -10,7 +10,7 @@ public sealed record PluginConfig
     /// 是否同意使用协议
     /// </summary>
     [JsonProperty(Required = Required.DisallowNull)]
-    public bool EULA { get; set; } = true;
+    public bool EULA { get; set; }
 
     /// <summary>
     /// 是否启用统计

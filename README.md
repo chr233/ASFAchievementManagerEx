@@ -47,7 +47,7 @@
 
 | ASFAchievementManagerEx 版本                                                      | 适配 ASF 版本 | 更新说明   |
 | --------------------------------------------------------------------------------- | :-----------: | ---------- |
-| [1.0.1.1](https://github.com/chr233/ASFAchievementManagerEx/releases/tag/1.0.1.1) |   5.4.10.3    | 第一个版本 |
+| [1.0.1.2](https://github.com/chr233/ASFAchievementManagerEx/releases/tag/1.0.1.2) |   5.4.10.3    | 第一个版本 |
 
 <details>
   <summary>历史版本</summary>

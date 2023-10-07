@@ -205,7 +205,7 @@
     <value> - Origin Message: {0}</value>
   </data>
   <data name="EulaWarning" xml:space="preserve">
-    <value>ASFEnhance.EULA not agreed, some features is disabled</value>
+    <value>{0}: ASFEnhance.EULA not agreed, some features is disabled</value>
   </data>
   <data name="ErrorLogErrorMessage" xml:space="preserve">
     <value> - Exception Message: {0}</value>
