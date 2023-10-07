@@ -19,13 +19,11 @@
 [![Steam](https://img.shields.io/badge/steam-donate-1B2838.svg?logo=steam)](https://steamcommunity.com/tradeoffer/new/?partner=221260487&token=xgqMgL-i)
 [![爱发电](https://img.shields.io/badge/爱发电-chr__-ea4aaa.svg?logo=github-sponsors)](https://afdian.net/@chr233)
 
-## 免责声明
-
-This plugin is provided on AS-IS basis, without any guarantee at all. Author is not responsible for any harm, direct or indirect, that may be caused by using this plugin. You use this plugin at your own risk.
-
 ## EULA
 
-> 请不要使用本插件来进行不受欢迎的行为, 包括但不限于: 刷好评, 发布广告 等.
+> 修改统计信息/成就具有一定风险, 修改有 VAC 保护的游戏的统计信息/成就可能会被封禁
+>
+> 使用本插件造成的任何后果与插件作者无关.
 >
 > 详见 [插件配置说明](#插件配置说明)
 
@@ -35,21 +33,22 @@ This plugin is provided on AS-IS basis, without any guarantee at all. Author is 
 
 1. 从 [GitHub Releases](https://github.com/chr233/ASFAchievementManagerEx/releases) 下载插件的最新版本
 2. 解压后将 `ASFAchievementManagerEx.dll` 丢进 `ArchiSteamFarm` 目录下的 `plugins` 文件夹
-3. 重新启动 `ArchiSteamFarm` , 使用命令 `ASFE` 来检查插件是否正常工作
+3. 重新启动 `ArchiSteamFarm` , 使用命令 `AAM` 来检查插件是否正常工作
 
 ### 使用命令升级插件
 
 > 可以使用插件自带的命令自带更新插件
 > ASF 版本升级有可能出现不兼容情况, 如果发现插件无法加载请尝试更新 ASF
 
-- `ASFEVERSION` / `AV` 检查插件更新
-- `ASFEUPDATE` / `AU` 自动更新插件到最新版本 (需要手动重启 ASF)
+- `AAMVERSION` / `AAMV` 检查插件更新
+- `AAMUPDATE` / `AAMU` 自动更新插件到最新版本 (需要手动重启 ASF)
 
 ### 更新日志
 
 | ASFAchievementManagerEx 版本                                                      | 适配 ASF 版本 | 更新说明 |
 | --------------------------------------------------------------------------------- | :-----------: | -------- |
 | [1.0.0.0](https://github.com/chr233/ASFAchievementManagerEx/releases/tag/1.0.0.0) |    5.4.9.3    |          |
+| [1.0.1.0](https://github.com/chr233/ASFAchievementManagerEx/releases/tag/1.0.1.0) |   5.4.10.3    |          |
 
 <details>
   <summary>历史版本</summary>
@@ -77,20 +76,19 @@ ASF.json
 }
 ```
 
-| 配置项         | 类型 | 默认值 | 说明                                                                                                     |
-| -------------- | ---- | ------ | -------------------------------------------------------------------------------------------------------- |
-| `EULA`         | bool | `true` | 是否同意 [EULA](#EULA)\*                                                                                 |
-| `Statistic`    | bool | `true` | 是否允许发送统计数据, 仅用于统计插件用户数量, 不会发送任何其他信息                                       |
-| `DisabledCmds` | list | `null` | 可选配置, 在此列表中的命令将会被禁用\*\* , **不区分大小写**, 仅对 `ASFAchievementManagerEx` 中的命令生效 |
+| 配置项         | 类型 | 默认值  | 说明                                                                                                     |
+| -------------- | ---- | ------- | -------------------------------------------------------------------------------------------------------- |
+| `EULA`         | bool | `false` | 是否同意 [EULA](#EULA)\*                                                                                 |
+| `Statistic`    | bool | `true`  | 是否允许发送统计数据, 仅用于统计插件用户数量, 不会发送任何其他信息                                       |
+| `DisabledCmds` | list | `null`  | 可选配置, 在此列表中的命令将会被禁用\*\* , **不区分大小写**, 仅对 `ASFAchievementManagerEx` 中的命令生效 |
 
-> \* 同意 [EULA](#EULA) 后, ASFAchievementManagerEx 将会开放全部命令, 作为交换, ASFAchievementManagerEx 会在执行 `GROUPLIST` 和 `CURATORLIST` 时自动关注作者的[鉴赏家](https://steamcommunity.com/groups/11012580/curation)和[组](https://steamcommunity.com/groups/11012580) (如果尚未关注的话)
+> 当 `EULA` 为 `false` 时, 所有命令将会被禁用
+> 当 `EULA` 为 `true` 时, 视为同意 [EULA](#EULA), 此时可以使用所有命令
 >
-> \* 禁用 [EULA](#EULA) 后, ASFAchievementManagerEx 将会限制使用 鉴赏家/群组/评测 等功能, 同时 ASFAchievementManagerEx 也不会主动关注[鉴赏家](https://steamcommunity.com/groups/11012580/curation)和[组](https://steamcommunity.com/groups/11012580)
->
-> \*\* `DisabledCmds` 配置说明: 该项配置**不区分大小写**, 仅对 `ASFAchievementManagerEx` 中的命令有效
+> \*\* `DisabledCmds` 配置说明: 该项配置**不区分大小写**, 仅对 `ASFEnhance` 中的命令有效
 > 例如配置为 `["foo","BAR"]` , 则代表 `FOO` 和 `BAR` 命令将会被禁用
 > 如果无需禁用任何命令, 请将此项配置为 `null` 或者 `[]`
-> 当某条命令被禁用时, 仍然可以使用 `ASFE.xxx` 的形式调用被禁用的命令, 例如 `ASFE.EXPLORER`
+> 当某条命令被禁用时, 仍然可以使用 `AAM.xxx` 的形式调用被禁用的命令, 例如 `AAM.ALIST`
 
 ## 插件指令说明
 
@@ -98,17 +96,21 @@ ASF.json
 
 | 命令                      | 缩写   | 权限            | 说明                                                           |
 | ------------------------- | ------ | --------------- | -------------------------------------------------------------- |
-| `ASFAchievementManagerEx` | `ASFE` | `FamilySharing` | 查看 ASFAchievementManagerEx 的版本                            |
-| `ASFEVERSION`             | `AV`   | `Operator`      | 检查 ASFAchievementManagerEx 是否为最新版本                    |
-| `ASFEUPDATE`              | `AU`   | `Owner`         | 自动更新 ASFAchievementManagerEx 到最新版本 (需要手动重启 ASF) |
+| `ASFAchievementManagerEx` | `AAM`  | `FamilySharing` | 查看 ASFAchievementManagerEx 的版本                            |
+| `AAMVERSION`              | `AAMV` | `Operator`      | 检查 ASFAchievementManagerEx 是否为最新版本                    |
+| `AAMUPDATE`               | `AAMU` | `Owner`         | 自动更新 ASFAchievementManagerEx 到最新版本 (需要手动重启 ASF) |
 
-## IPC 接口
+### 核心功能
 
-> 使用该功能前需要同意 EULA, 详见 [插件配置说明](#插件配置说明)
-
-| API | 方法 | 参数 | 说明 |
-| --- | ---- | ---- | ---- |
-| -   |      |      |      |
+| 命令                                    | 缩写 | 权限       | 说明                                                             |
+| --------------------------------------- | ---- | ---------- | ---------------------------------------------------------------- |
+| `ALIST [Bots] <AppIds>`                 | -    | `Operator` | 获取指定机器人的成就列表                                         |
+| `ASTATS [Bots] <AppIds>`                | -    | `Operator` | 获取指定机器人的统计项列表                                       |
+| `AUNLOCK [Bots] AppId <AchievementIds>` | -    | `Master`   | 解锁指定游戏的成就, 部分成就只能由官方服务器设置, 客户端无法解锁 |
+| `ASET [Bots] AppId <AchievementIds>`    | -    | `Master`   | 同 `AUNLOCK` (原版插件的指令)                                    |
+| `ALOCK [Bots] AppId <AchievementIds>`   | -    | `Master`   | 锁住指定游戏的成就, 部分成就只能由官方服务器设置, 客户端无法解锁 |
+| `ARESET [Bots] AppId <AchievementIds>`  | -    | `Master`   | 同 `ALOCK` (原版插件的指令)                                      |
+| `AEDIT [Bots] AppId <KeyValues>`        | -    | `Master`   | 设置指定游戏的统计项                                             |
 
 ---
 

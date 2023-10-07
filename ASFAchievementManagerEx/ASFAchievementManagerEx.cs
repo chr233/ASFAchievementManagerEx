@@ -193,14 +193,14 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
             },
             _ => cmd switch
             {
-                "ALIST" when argLength > 2 && access >= EAccess.Master =>
+                "ALIST" when argLength > 2 && access >= EAccess.Operator =>
                     Command.ResponseGetAchievementList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
-                "ALIST" when access >= EAccess.Master =>
+                "ALIST" when access >= EAccess.Operator =>
                     Command.ResponseGetAchievementList(bot, args[1]),
 
-                "ASTATS" when argLength > 2 && access >= EAccess.Master =>
+                "ASTATS" when argLength > 2 && access >= EAccess.Operator =>
                     Command.ResponseGetStatsList(args[1], Utilities.GetArgsAsText(args, 2, ",")),
-                "ASTATS" when argLength > 1 && access >= EAccess.Master =>
+                "ASTATS" when argLength > 1 && access >= EAccess.Operator =>
                     Command.ResponseGetStatsList(bot, args[1]),
 
                 "ASET" when argLength > 3 && access >= EAccess.Master =>
