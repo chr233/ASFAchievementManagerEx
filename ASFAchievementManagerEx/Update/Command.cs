@@ -30,14 +30,14 @@ internal static class Command
         var sb = new StringBuilder();
         sb.AppendLine(FormatStaticResponse(Langs.MultipleLineResult));
 
-        sb.AppendLine(string.Format(Langs.ASFECurrentVersion, MyVersion.ToString()));
-        sb.AppendLine(string.Format(Langs.ASFEOnlineVersion, response.TagName));
-        sb.AppendLine(string.Format(Langs.Detail, response.Body));
+        sb.AppendLineFormat(Langs.ASFECurrentVersion, MyVersion);
+        sb.AppendLineFormat(Langs.ASFEOnlineVersion, response.TagName);
+        sb.AppendLineFormat(Langs.Detail, response.Body);
         sb.AppendLine(Langs.Assert);
 
         foreach (var asset in response.Assets)
         {
-            sb.AppendLine(string.Format(Langs.SubName, asset.Name));
+            sb.AppendLineFormat(Langs.SubName, asset.Name);
         }
 
         sb.AppendLine(Langs.UpdateTips);
@@ -94,7 +94,7 @@ internal static class Command
             return FormatStaticResponse(Langs.DownloadFailed);
         }
 
-        MemoryStream ms = new(zipBytes);
+        var ms = new MemoryStream(zipBytes);
 
         try
         {
@@ -119,9 +119,9 @@ internal static class Command
                         sb.AppendLine(Langs.UpdateSuccess);
 
                         sb.AppendLine();
-                        sb.AppendLine(string.Format(Langs.ASFECurrentVersion, MyVersion.ToString()));
-                        sb.AppendLine(string.Format(Langs.ASFEOnlineVersion, releaseResponse.TagName));
-                        sb.AppendLine(string.Format(Langs.Detail, releaseResponse.Body));
+                        sb.AppendLineFormat(Langs.ASFECurrentVersion, MyVersion.ToString());
+                        sb.AppendLineFormat(Langs.ASFEOnlineVersion, releaseResponse.TagName);
+                        sb.AppendLineFormat(Langs.Detail, releaseResponse.Body);
 
                         return sb.ToString();
                     }

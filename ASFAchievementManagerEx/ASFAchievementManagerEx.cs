@@ -2,7 +2,6 @@ using ArchiSteamFarm.Core;
 using ArchiSteamFarm.Plugins.Interfaces;
 using ArchiSteamFarm.Steam;
 using ASFAchievementManagerEx.Core;
-using ASFAchievementManagerEx.Localization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SteamKit2;
@@ -108,7 +107,7 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
         message.AppendLine(Static.Line);
         message.AppendLine(Static.Logo);
         message.AppendLine(Static.Line);
-        message.AppendLine(string.Format(Langs.PluginVer, nameof(ASFAchievementManagerEx), MyVersion.ToString()));
+        message.AppendLineFormat(Langs.PluginVer, nameof(ASFAchievementManagerEx), MyVersion);
         message.AppendLine(Langs.PluginContact);
         message.AppendLine(Langs.PluginInfo);
 
@@ -148,11 +147,9 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
     /// </summary>
     /// <param name="bot"></param>
     /// <param name="access"></param>
-    /// <param name="message"></param>
     /// <param name="args"></param>
-    /// <param name="steamId"></param>
     /// <returns></returns>
-    private static Task<string?>? ResponseCommand(Bot bot, EAccess access, string message, string[] args)
+    private static Task<string?>? ResponseCommand(Bot bot, EAccess access, string[] args)
     {
         var cmd = args[0].ToUpperInvariant();
 
@@ -165,7 +162,7 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
             //跳过禁用命令
             if (Config.DisabledCmds?.Contains(cmd) == true)
             {
-                ASFLogger.LogGenericInfo("Command {0} is disabled!");
+                ASFLogger.LogGenericInfo(Langs.CommandDisabled);
                 return null;
             }
         }
@@ -177,19 +174,19 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
             1 => cmd switch
             {
                 //Update
-                "ASFENHANCE" when access >= EAccess.FamilySharing =>
+                "ASFACHIEVEMENTMANAGER" when access >= EAccess.FamilySharing =>
                     Task.FromResult(Update.Command.ResponseASFEnhanceVersion()),
                 "AAM" when access >= EAccess.FamilySharing =>
                     Task.FromResult(Update.Command.ResponseASFEnhanceVersion()),
 
-                "ASFEVERSION" when access >= EAccess.Operator =>
+                "AAMVERSION" when access >= EAccess.Operator =>
                     Update.Command.ResponseCheckLatestVersion(),
-                "AV" when access >= EAccess.Operator =>
+                "AAMV" when access >= EAccess.Operator =>
                     Update.Command.ResponseCheckLatestVersion(),
 
-                "ASFEUPDATE" when access >= EAccess.Owner =>
+                "AAMUPDATE" when access >= EAccess.Owner =>
                     Update.Command.ResponseUpdatePlugin(),
-                "AU" when access >= EAccess.Owner =>
+                "AAMU" when access >= EAccess.Owner =>
                     Update.Command.ResponseUpdatePlugin(),
 
                 _ => null,
@@ -227,7 +224,7 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
                 "AEDIT" when argLength > 3 && access >= EAccess.Master =>
                     Command.ResponseSetStats(args[1], args[2], Utilities.GetArgsAsText(args, 3, ",")),
                 "AEDIT" when argLength > 2 && access >= EAccess.Master =>
-                    Command.ResponseSetStats(bot, args[2], Utilities.GetArgsAsText(args, 2, ",")),
+                    Command.ResponseSetStats(bot, args[1], Utilities.GetArgsAsText(args, 2, ",")),
 
                 _ => null,
             },
@@ -276,9 +273,14 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
             throw new InvalidEnumArgumentException(nameof(access), (int)access, typeof(EAccess));
         }
 
+        if (!Config.EULA)
+        {
+            return FormatStaticResponse(Langs.EulaCmdUnavilable);
+        }
+
         try
         {
-            var task = ResponseCommand(bot, access, message, args);
+            var task = ResponseCommand(bot, access, args);
             if (task != null)
             {
                 return await task.ConfigureAwait(false);
@@ -301,15 +303,15 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
             var sb = new StringBuilder();
             sb.AppendLine(Langs.ErrorLogTitle);
             sb.AppendLine(Static.Line);
-            sb.AppendLine(string.Format(Langs.ErrorLogOriginMessage, message));
-            sb.AppendLine(string.Format(Langs.ErrorLogAccess, access.ToString()));
-            sb.AppendLine(string.Format(Langs.ErrorLogASFVersion, version));
-            sb.AppendLine(string.Format(Langs.ErrorLogPluginVersion, MyVersion));
+            sb.AppendLineFormat(Langs.ErrorLogOriginMessage, message);
+            sb.AppendLineFormat(Langs.ErrorLogAccess, access.ToString());
+            sb.AppendLineFormat(Langs.ErrorLogASFVersion, version);
+            sb.AppendLineFormat(Langs.ErrorLogPluginVersion, MyVersion);
             sb.AppendLine(Static.Line);
             sb.AppendLine(cfg);
             sb.AppendLine(Static.Line);
-            sb.AppendLine(string.Format(Langs.ErrorLogErrorName, ex.GetType()));
-            sb.AppendLine(string.Format(Langs.ErrorLogErrorMessage, ex.Message));
+            sb.AppendLineFormat(Langs.ErrorLogErrorName, ex.GetType());
+            sb.AppendLineFormat(Langs.ErrorLogErrorMessage, ex.Message);
             sb.AppendLine(ex.StackTrace);
 
             _ = Task.Run(async () =>

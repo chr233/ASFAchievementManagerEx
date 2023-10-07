@@ -1,5 +1,3 @@
-using System.Security;
-
 namespace ASFAchievementManagerEx.Data;
 
 internal sealed record UserStatsData
@@ -41,8 +39,8 @@ internal record StatsData
 
     public int Permission { get; set; }
     public uint Value { get; set; }
-    public int Default { get; set; }
-    public int? MaxChange { get; set; }
+    public uint? Default { get; set; }
+    public uint? MaxChange { get; set; }
     public uint? Min { get; set; }
     public uint? Max { get; set; }
 

@@ -2,11 +2,8 @@ using ArchiSteamFarm.Core;
 using ArchiSteamFarm.Localization;
 using ArchiSteamFarm.Steam;
 using ArchiSteamFarm.Steam.Interaction;
-using ASFAchievementManagerEx.Localization;
-using SteamKit2.Internal;
 using System.Collections.Concurrent;
 using System.Text;
-using static SteamKit2.Internal.CMsgClientRequestedClientStats;
 
 namespace ASFAchievementManagerEx.Core;
 internal static class Command
@@ -28,13 +25,13 @@ internal static class Command
 
         var sb = new StringBuilder();
 
-        var entries = appIds.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+        var entries = appIds.Split(',', StringSplitOptions.RemoveEmptyEntries);
 
         foreach (var entry in entries)
         {
             if (!uint.TryParse(entry, out uint gameId) || (gameId == 0))
             {
-                sb.AppendLine(bot.FormatBotResponse(string.Format(Langs.ArgsInvalid, nameof(gameId), gameId)));
+                sb.AppendLine(bot.FormatBotResponse(Langs.ArgsInvalid, nameof(gameId), gameId));
             }
             else
             {
@@ -43,18 +40,18 @@ internal static class Command
 
                 if (achievements?.Count > 0)
                 {
-                    sb.AppendLine(bot.FormatBotResponse(string.Format("App/{0} 的成就列表:", entry)));
+                    sb.AppendLine(bot.FormatBotResponse(Langs.AchievementList, entry));
 
                     var id = 1;
                     foreach (var achievement in achievements)
                     {
-                        sb.AppendLine(string.Format(
-                            "- {0,-3} {1} {2}{3}",
+                        sb.AppendLineFormat(
+                            Langs.AchievementItem,
                             id++,
                             achievement.IsUnlock ? Static.Yes : Static.No,
                             achievement.Name,
                             achievement.IsProtected ? Static.Lock : ""
-                        ));
+                        );
                     }
                 }
                 else
@@ -99,9 +96,9 @@ internal static class Command
     /// 获取成就数据列表
     /// </summary>
     /// <param name="bot"></param>
-    /// <param name="appids"></param>
+    /// <param name="appIds"></param>
     /// <returns></returns>
-    internal static async Task<string?> ResponseGetStatsList(Bot bot, string appids)
+    internal static async Task<string?> ResponseGetStatsList(Bot bot, string appIds)
     {
         if (!Handlers.TryGetValue(bot, out var handler))
         {
@@ -110,13 +107,13 @@ internal static class Command
 
         var sb = new StringBuilder();
 
-        var entries = appids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+        var entries = appIds.Split(',', StringSplitOptions.RemoveEmptyEntries);
 
         foreach (var entry in entries)
         {
             if (!uint.TryParse(entry, out uint gameId) || (gameId == 0))
             {
-                sb.AppendLine(bot.FormatBotResponse(string.Format(Langs.ArgsInvalid, nameof(gameId), gameId)));
+                sb.AppendLine(bot.FormatBotResponse(Langs.ArgsInvalid, nameof(gameId), gameId));
             }
             else
             {
@@ -125,20 +122,20 @@ internal static class Command
 
                 if (statsDict?.Count > 0)
                 {
-                    sb.AppendLine(bot.FormatBotResponse(string.Format("App/{0} 的统计数据列表:", entry)));
+                    sb.AppendLine(bot.FormatBotResponse(Langs.StatsList, entry));
                     sb.AppendLine(Langs.StatsTitle);
 
                     foreach (var (id, stats) in statsDict)
                     {
-                        sb.AppendLine(string.Format(
-                            "- {0,-3} [{1}] {2}{3}{4}{5}",
+                        sb.AppendLineFormat(
+                            Langs.StatsItem,
                             id,
                             stats.StrValue,
                             stats.Name,
                             stats.IsProtected ? Static.Lock : "",
                             stats.IsIncrementOnly ? Static.IncrementOnly : "",
                             stats.MaxChange != null ? string.Format(Langs.MaxChange, Static.Warning, stats.MaxChange) : ""
-                        ));
+                        );
                     }
                 }
                 else
@@ -157,9 +154,9 @@ internal static class Command
     /// 获取成就数据列表 (多个Bot)
     /// </summary>
     /// <param name="botNames"></param>
-    /// <param name="appid"></param>
+    /// <param name="appId"></param>
     /// <returns></returns>
-    internal static async Task<string?> ResponseGetStatsList(string botNames, string appid)
+    internal static async Task<string?> ResponseGetStatsList(string botNames, string appId)
     {
         if (string.IsNullOrEmpty(botNames))
         {
@@ -173,7 +170,7 @@ internal static class Command
             return Commands.FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
         }
 
-        var results = await Utilities.InParallel(bots.Select(bot => ResponseGetStatsList(bot, appid))).ConfigureAwait(false);
+        var results = await Utilities.InParallel(bots.Select(bot => ResponseGetStatsList(bot, appId))).ConfigureAwait(false);
 
         var responses = new List<string?>(results.Where(result => !string.IsNullOrEmpty(result)));
 
@@ -202,7 +199,7 @@ internal static class Command
 
         if (!uint.TryParse(appId, out var gameId))
         {
-            return bot.FormatBotResponse(string.Format(Langs.ArgsInvalid, nameof(appId), appId));
+            return bot.FormatBotResponse(Langs.ArgsInvalid, nameof(appId), appId);
         }
 
         var (userStats, crc_status) = await handler.GetUserStatsWithCrcStats(bot, gameId).ConfigureAwait(false);
@@ -210,7 +207,7 @@ internal static class Command
 
         if (achievementList == null)
         {
-            return bot.FormatBotResponse(string.Format(Langs.GetAchievementDataFailure, appId));
+            return bot.FormatBotResponse(Langs.GetAchievementDataFailure, appId);
         }
 
         var effectedAchievements = new HashSet<AchievementData>();
@@ -219,14 +216,14 @@ internal static class Command
 
         if (query != "*")
         {
-            var entries = query.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            var entries = query.Split(',', StringSplitOptions.RemoveEmptyEntries);
             foreach (var entry in entries)
             {
                 if (int.TryParse(entry, out var index))
                 {
                     if (achievementList.Count < index || index <= 0)
                     {
-                        warnings.AppendLine(string.Format("{0}: 无此ID的成就", index));
+                        warnings.AppendLineFormat(Langs.AchievementNotFounf, index);
                     }
                     else
                     {
@@ -234,11 +231,11 @@ internal static class Command
 
                         if (achievement.IsUnlock == unlock)
                         {
-                            warnings.AppendLine(string.Format("{0}: 无需修改该项成就", index));
+                            warnings.AppendLineFormat(Langs.AchievementChangeUnnecessary, index, achievement.Name);
                         }
                         else if (achievement.IsProtected)
                         {
-                            warnings.AppendLine(string.Format("{0}: 无法修改被保护的成就", index));
+                            warnings.AppendLineFormat(Langs.AchievementIsProtected, index, achievement.Name);
                         }
                         else
                         {
@@ -248,7 +245,7 @@ internal static class Command
                 }
                 else
                 {
-                    warnings.AppendLine(string.Format("{0}: 无效参数, 需要为整数", entry));
+                    warnings.AppendLineFormat(Langs.AchievementIdInvalid, entry);
                 }
             }
         }
@@ -267,19 +264,19 @@ internal static class Command
         if (warnings.Length > 0)
         {
             sb.AppendLine(Langs.MultipleLineResult);
-            sb.AppendLine("警告信息:");
+            sb.AppendLine(Langs.WarningInfo);
             sb.AppendLine(warnings.ToString());
-            sb.AppendLine("执行结果:");
+            sb.AppendLine(Langs.ExecuteResult);
         }
 
         if (effectedAchievements.Any())
         {
-            var result = await handler.SetAchievements(bot, gameId, crc_status, effectedAchievements, unlock).ConfigureAwait(false);
-            sb.AppendLine(string.Format("设置成就{0}, 受影响成就 {1} 个", result == true ? Langs.Success : Langs.Failure, effectedAchievements.Count));
+            var result = await handler.ModifyAchievements(bot, gameId, crc_status, effectedAchievements, unlock).ConfigureAwait(false);
+            sb.AppendLineFormat(Langs.SetAchievementResult, result == true ? Langs.Success : Langs.Failure, effectedAchievements.Count);
         }
         else
         {
-            sb.AppendLine("无待设置的成就");
+            sb.AppendLine(Langs.NoAchievementEffected);
         }
 
         return bot.FormatBotResponse(sb.ToString());
@@ -289,11 +286,11 @@ internal static class Command
     /// 修改成就 (多个Bot)
     /// </summary>
     /// <param name="botNames"></param>
-    /// <param name="appid"></param>
+    /// <param name="appId"></param>
     /// <param name="achievementNumbers"></param>
     /// <param name="unlock"></param>
     /// <returns></returns>
-    internal static async Task<string?> ResponseSetAchievement(string botNames, string appid, string achievementNumbers, bool unlock = true)
+    internal static async Task<string?> ResponseSetAchievement(string botNames, string appId, string achievementNumbers, bool unlock = true)
     {
         if (string.IsNullOrEmpty(botNames))
         {
@@ -307,7 +304,7 @@ internal static class Command
             return FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
         }
 
-        var results = await Utilities.InParallel(bots.Select(bot => ResponseSetAchievement(bot, appid, achievementNumbers, unlock))).ConfigureAwait(false);
+        var results = await Utilities.InParallel(bots.Select(bot => ResponseSetAchievement(bot, appId, achievementNumbers, unlock))).ConfigureAwait(false);
 
         var responses = new List<string?>(results.Where(result => !string.IsNullOrEmpty(result)));
 
@@ -319,7 +316,7 @@ internal static class Command
     /// 修改统计数据
     /// </summary>
     /// <param name="bot"></param>
-    /// <param name="appid"></param>
+    /// <param name="appId"></param>
     /// <param name="query"></param>
     /// <returns></returns>
     internal static async Task<string?> ResponseSetStats(Bot bot, string appId, string query)
@@ -336,7 +333,7 @@ internal static class Command
 
         if (!uint.TryParse(appId, out var gameId))
         {
-            return bot.FormatBotResponse(string.Format(Langs.ArgsInvalid, nameof(appId), appId));
+            return bot.FormatBotResponse(Langs.ArgsInvalid, nameof(appId), appId);
         }
 
         var (userStats, crc_status) = await handler.GetUserStatsWithCrcStats(bot, gameId).ConfigureAwait(false);
@@ -344,56 +341,100 @@ internal static class Command
 
         if (statsDict == null)
         {
-            return bot.FormatBotResponse(string.Format(Langs.GetAchievementDataFailure, appId));
+            return bot.FormatBotResponse(Langs.GetAchievementDataFailure, appId);
         }
 
-        var effectedAchievements = new Dictionary<uint,uint>();
+        var effectedAchievements = new HashSet<StatsData>();
 
         var warnings = new StringBuilder();
 
-        if (query != "*")
-        {
-            var entries = query.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var entry in entries)
-            {
-                if (int.TryParse(entry, out var index))
-                {
-                    if (achievementList.Count < index || index <= 0)
-                    {
-                        warnings.AppendLine(string.Format("{0}: 无此ID的成就", index));
-                    }
-                    else
-                    {
-                        var achievement = achievementList[index - 1];
 
-                        if (achievement.IsUnlock == unlock)
+        var entries = query.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        foreach (var entry in entries)
+        {
+            var args = entry.Split('=', StringSplitOptions.RemoveEmptyEntries);
+            if (args.Length < 2)
+            {
+                warnings.AppendLineFormat(Langs.StatsArgumentInvalid, entry);
+                continue;
+            }
+
+            if (uint.TryParse(args[0], out var index))
+            {
+                if (statsDict.TryGetValue(index, out var stat))
+                {
+                    if (stat.IsProtected)
+                    {
+                        warnings.AppendLineFormat(Langs.StatsIsProtected, index, stat.Name, stat.StrValue);
+                    }
+
+                    uint? targetValue = null;
+                    switch (args[1].ToLowerInvariant())
+                    {
+                        case "d":
+                        case "default":
+                            if (stat.Default == null)
+                            {
+                                warnings.AppendLineFormat(Langs.StatsCantSetToDefault, stat.Id, stat.Name, stat.StrValue);
+                            }
+                            targetValue = stat.Default;
+                            break;
+                        case "i":
+                        case "min":
+                            if (stat.Min == null)
+                            {
+                                warnings.AppendLineFormat(Langs.StatsCantSetToMin, stat.Id, stat.Name, stat.StrValue);
+                            }
+                            targetValue = stat.Min;
+                            break;
+                        case "a":
+                        case "max":
+                            if (stat.Max == null)
+                            {
+                                warnings.AppendLineFormat(Langs.StatsCantSetToMax, stat.Id, stat.Name, stat.StrValue);
+                            }
+                            targetValue = stat.Max;
+                            break;
+                        default:
+                            if (uint.TryParse(args[1], out var value))
+                            {
+                                targetValue = value;
+                            }
+                            else
+                            {
+                                warnings.AppendLineFormat(Langs.StatsTargetValueInvalid, stat.Id, stat.Name, stat.StrValue, args[1]);
+                            }
+                            break;
+                    }
+
+                    if (targetValue != null)
+                    {
+                        if (stat.Value == targetValue)
                         {
-                            warnings.AppendLine(string.Format("{0}: 无需修改该项成就", index));
+                            warnings.AppendLineFormat(Langs.StatsChangeUnnecessary, index, stat.Name, stat.StrValue);
                         }
-                        else if (achievement.IsProtected)
+                        else if (stat.IsIncrementOnly && stat.Value > targetValue)
                         {
-                            warnings.AppendLine(string.Format("{0}: 无法修改被保护的成就", index));
+                            warnings.AppendLineFormat(Langs.StatsIncrementOnlyLimited, index, stat.Name, stat.StrValue, targetValue);
                         }
-                        else
+                        else if (stat.MaxChange != null && Math.Abs((decimal)stat.Value - targetValue.Value) > stat.MaxChange)
                         {
-                            effectedAchievements.Add(achievement);
+                            warnings.AppendLineFormat(Langs.StatsMaxChangeLimited, index, stat.Name, stat.StrValue, targetValue, stat.MaxChange);
+                            targetValue = stat.Value > targetValue ? stat.Value + stat.MaxChange : stat.Value - stat.MaxChange;
                         }
+
+                        stat.Value = targetValue.Value;
+                        effectedAchievements.Add(stat);
                     }
                 }
                 else
                 {
-                    warnings.AppendLine(string.Format("{0}: 无效参数, 需要为整数", entry));
+                    warnings.AppendLineFormat(Langs.StatsNotFound, index);
                 }
             }
-        }
-        else
-        {
-            foreach (var achievement in achievementList)
+            else
             {
-                if (!achievement.IsProtected && achievement.IsUnlock != unlock)
-                {
-                    effectedAchievements.Add(achievement);
-                }
+                warnings.AppendLineFormat(Langs.StatsArgumentInvalid, entry);
             }
         }
 
@@ -401,19 +442,19 @@ internal static class Command
         if (warnings.Length > 0)
         {
             sb.AppendLine(Langs.MultipleLineResult);
-            sb.AppendLine("警告信息:");
+            sb.AppendLine(Langs.WarningInfo);
             sb.AppendLine(warnings.ToString());
-            sb.AppendLine("执行结果:");
+            sb.AppendLine(Langs.ExecuteResult);
         }
 
         if (effectedAchievements.Any())
         {
-            var result = await handler.SetAchievements(bot, gameId, crc_status, effectedAchievements, unlock).ConfigureAwait(false);
-            sb.AppendLine(string.Format("设置成就{0}, 受影响成就 {1} 个", result == true ? Langs.Success : Langs.Failure, effectedAchievements.Count));
+            var result = await handler.ModifyStats(bot, gameId, crc_status, effectedAchievements).ConfigureAwait(false);
+            sb.AppendLineFormat(Langs.SetStatsResult, result == true ? Langs.Success : Langs.Failure, effectedAchievements.Count);
         }
         else
         {
-            sb.AppendLine("无待设置的成就");
+            sb.AppendLine(Langs.NoStatsEffected);
         }
 
         return bot.FormatBotResponse(sb.ToString());
@@ -423,10 +464,10 @@ internal static class Command
     /// 修改统计数据 (多个Bot)
     /// </summary>
     /// <param name="botNames"></param>
-    /// <param name="appid"></param>
-    /// <param name="kvSet"></param>
+    /// <param name="appId"></param>
+    /// <param name="query"></param>
     /// <returns></returns>
-    internal static async Task<string?> ResponseSetStats(string botNames, string appid, string kvSet)
+    internal static async Task<string?> ResponseSetStats(string botNames, string appId, string query)
     {
         if (string.IsNullOrEmpty(botNames))
         {
@@ -440,7 +481,7 @@ internal static class Command
             return FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
         }
 
-        var results = await Utilities.InParallel(bots.Select(bot => ResponseSetStats(bot, appid, kvSet))).ConfigureAwait(false);
+        var results = await Utilities.InParallel(bots.Select(bot => ResponseSetStats(bot, appId, query))).ConfigureAwait(false);
 
         var responses = new List<string?>(results.Where(result => !string.IsNullOrEmpty(result)));
 

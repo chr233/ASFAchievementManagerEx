@@ -61,6 +61,60 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
+        ///   查找类似 {0}-{1}: 无需修改该项成就 的本地化字符串。
+        /// </summary>
+        internal static string AchievementChangeUnnecessary {
+            get {
+                return ResourceManager.GetString("AchievementChangeUnnecessary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: 无效参数, 需要为整数 的本地化字符串。
+        /// </summary>
+        internal static string AchievementIdInvalid {
+            get {
+                return ResourceManager.GetString("AchievementIdInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}-{1}: 无法修改被保护的成就 的本地化字符串。
+        /// </summary>
+        internal static string AchievementIsProtected {
+            get {
+                return ResourceManager.GetString("AchievementIsProtected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 - {0,-3} {1} {2}{3} 的本地化字符串。
+        /// </summary>
+        internal static string AchievementItem {
+            get {
+                return ResourceManager.GetString("AchievementItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 App/{0} 的成就列表: 的本地化字符串。
+        /// </summary>
+        internal static string AchievementList {
+            get {
+                return ResourceManager.GetString("AchievementList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: 找不到此ID的成就 的本地化字符串。
+        /// </summary>
+        internal static string AchievementNotFounf {
+            get {
+                return ResourceManager.GetString("AchievementNotFounf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 当前已经是最新版本, 无需更新插件 的本地化字符串。
         /// </summary>
         internal static string AlreadyLatest {
@@ -115,7 +169,7 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
-        ///   查找类似 使用命令 ASFEUPDATE / AU 自动更新插件 的本地化字符串。
+        ///   查找类似 使用命令 AAMUPDATE / AAMU 自动更新插件 的本地化字符串。
         /// </summary>
         internal static string ASFEUpdateTips {
             get {
@@ -124,7 +178,7 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
-        ///   查找类似 使用命令 ASFEVERSION / AV 检查插件更新 的本地化字符串。
+        ///   查找类似 使用命令 AAMVERSION / AAMV 检查插件更新 的本地化字符串。
         /// </summary>
         internal static string ASFEVersionTips {
             get {
@@ -156,6 +210,15 @@ namespace ASFAchievementManagerEx.Localization {
         internal static string CleanUpOldBackupFailed {
             get {
                 return ResourceManager.GetString("CleanUpOldBackupFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 命令 {0} 被禁用! 的本地化字符串。
+        /// </summary>
+        internal static string CommandDisabled {
+            get {
+                return ResourceManager.GetString("CommandDisabled", resourceCulture);
             }
         }
         
@@ -277,20 +340,20 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
-        ///   查找类似 尚未同意 ASFEnhance.EULA , 无法使用IPC功能 的本地化字符串。
-        /// </summary>
-        internal static string EulaFeatureUnavilable {
-            get {
-                return ResourceManager.GetString("EulaFeatureUnavilable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 尚未同意 EULA , 部分命令已禁用 的本地化字符串。
         /// </summary>
         internal static string EulaWarning {
             get {
                 return ResourceManager.GetString("EulaWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 执行结果: 的本地化字符串。
+        /// </summary>
+        internal static string ExecuteResult {
+            get {
+                return ResourceManager.GetString("ExecuteResult", resourceCulture);
             }
         }
         
@@ -376,11 +439,29 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
+        ///   查找类似 无待设置的成就 的本地化字符串。
+        /// </summary>
+        internal static string NoAchievementEffected {
+            get {
+                return ResourceManager.GetString("NoAchievementEffected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 无参数 的本地化字符串。
         /// </summary>
         internal static string NoArgs {
             get {
                 return ResourceManager.GetString("NoArgs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 无待设置的统计项 的本地化字符串。
+        /// </summary>
+        internal static string NoStatsEffected {
+            get {
+                return ResourceManager.GetString("NoStatsEffected", resourceCulture);
             }
         }
         
@@ -394,7 +475,7 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
-        ///   查找类似 作者 Chr_, 联系方式 chr@chrxw.com 的本地化字符串。
+        ///   查找类似 作者 Rudokhvist, Chr_, 联系方式 chr@chrxw.com 的本地化字符串。
         /// </summary>
         internal static string PluginContact {
             get {
@@ -421,7 +502,133 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
-        ///   查找类似   Id  [Min Current Max] Name 🔒受保护🔼仅能增加⚠️最大修改量 的本地化字符串。
+        ///   查找类似 设置成就{0}, 受影响成就 {1} 个 的本地化字符串。
+        /// </summary>
+        internal static string SetAchievementResult {
+            get {
+                return ResourceManager.GetString("SetAchievementResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 设置统计项{0}, 受影响统计项 {1} 个 的本地化字符串。
+        /// </summary>
+        internal static string SetStatsResult {
+            get {
+                return ResourceManager.GetString("SetStatsResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: 无效参数, 格式为n=x, n为整数, x为整数或d/default(默认值)或i/min(最小值)或a/max(最大值) 的本地化字符串。
+        /// </summary>
+        internal static string StatsArgumentInvalid {
+            get {
+                return ResourceManager.GetString("StatsArgumentInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}-{1} [{2}]: 无法设置为默认值, 默认值为Null 的本地化字符串。
+        /// </summary>
+        internal static string StatsCantSetToDefault {
+            get {
+                return ResourceManager.GetString("StatsCantSetToDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}-{1} [{2}]: 无法设置为最大值, 最大值为Null 的本地化字符串。
+        /// </summary>
+        internal static string StatsCantSetToMax {
+            get {
+                return ResourceManager.GetString("StatsCantSetToMax", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}-{1} [{2}]: 无法设置为最小值, 最小值为Null 的本地化字符串。
+        /// </summary>
+        internal static string StatsCantSetToMin {
+            get {
+                return ResourceManager.GetString("StatsCantSetToMin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}-{1} [{2}]: 无需更改的统计项 的本地化字符串。
+        /// </summary>
+        internal static string StatsChangeUnnecessary {
+            get {
+                return ResourceManager.GetString("StatsChangeUnnecessary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}-{1} [{2}]: 具有递增限制的统计项无法设置为更低的值 {3} 的本地化字符串。
+        /// </summary>
+        internal static string StatsIncrementOnlyLimited {
+            get {
+                return ResourceManager.GetString("StatsIncrementOnlyLimited", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}-{1} [{2}]: 无法修改被保护的统计项 的本地化字符串。
+        /// </summary>
+        internal static string StatsIsProtected {
+            get {
+                return ResourceManager.GetString("StatsIsProtected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 - {0,-3} [{1}] {2}{3}{4}{5} 的本地化字符串。
+        /// </summary>
+        internal static string StatsItem {
+            get {
+                return ResourceManager.GetString("StatsItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 App/{0} 的统计数据列表: 的本地化字符串。
+        /// </summary>
+        internal static string StatsList {
+            get {
+                return ResourceManager.GetString("StatsList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}-{1} [{2}]: 设定的值 {3} 超过了最大该变量 {4}, 修改为允许的上/下限 的本地化字符串。
+        /// </summary>
+        internal static string StatsMaxChangeLimited {
+            get {
+                return ResourceManager.GetString("StatsMaxChangeLimited", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: 找不到此统计项ID 的本地化字符串。
+        /// </summary>
+        internal static string StatsNotFound {
+            get {
+                return ResourceManager.GetString("StatsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}-{1} [{2}]: 无法设置为{3}, 参数需要为整数 的本地化字符串。
+        /// </summary>
+        internal static string StatsTargetValueInvalid {
+            get {
+                return ResourceManager.GetString("StatsTargetValueInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似   Id  [最小 当前 最大] 名称 | 🔒受保护🔼仅能增加⚠️最大修改量 的本地化字符串。
         /// </summary>
         internal static string StatsTitle {
             get {
@@ -484,7 +691,7 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
-        ///   查找类似 可以使用命令 ASFEUPDATE / AU 自动更新插件 的本地化字符串。
+        ///   查找类似 可以使用命令 AAMUPDATE / AAMU 自动更新插件 的本地化字符串。
         /// </summary>
         internal static string UpdateTips {
             get {
@@ -498,6 +705,15 @@ namespace ASFAchievementManagerEx.Localization {
         internal static string Version {
             get {
                 return ResourceManager.GetString("Version", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 警告信息: 的本地化字符串。
+        /// </summary>
+        internal static string WarningInfo {
+            get {
+                return ResourceManager.GetString("WarningInfo", resourceCulture);
             }
         }
         

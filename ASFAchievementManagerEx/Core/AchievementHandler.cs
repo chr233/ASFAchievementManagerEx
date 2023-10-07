@@ -69,7 +69,12 @@ internal sealed class AchievementHandler : ClientMsgHandler
         return (data, response.Response.crc_stats);
     }
 
-    private UserStatsData? ParseResponse(CMsgClientGetUserStatsResponse payload)
+    /// <summary>
+    /// 解析响应数据
+    /// </summary>
+    /// <param name="payload"></param>
+    /// <returns></returns>
+    private static UserStatsData? ParseResponse(CMsgClientGetUserStatsResponse payload)
     {
         if (payload.schema == null)
         {
@@ -161,8 +166,8 @@ internal sealed class AchievementHandler : ClientMsgHandler
                     statsValueDict.TryGetValue(statId, out var statValue);
 
                     var permission = stat.ReadAsInt("permission", 0);
-                    var def = stat.ReadAsInt("default", 0);
-                    var maxChange = stat.ReadAsInt("maxchange");
+                    var def = stat.ReadAsUInt("default", 0);
+                    var maxChange = stat.ReadAsUInt("maxchange");
                     var min = stat.ReadAsUInt("min");
                     var max = stat.ReadAsUInt("max");
 
@@ -199,11 +204,34 @@ internal sealed class AchievementHandler : ClientMsgHandler
     }
 
     /// <summary>
+    /// 获取用户成就数据
+    /// </summary>
+    /// <param name="bot"></param>
+    /// <param name="gameID"></param>
+    /// <returns></returns>
+    internal async Task<UserStatsData?> GetUserStats(Bot bot, ulong gameID)
+    {
+        var (data, _) = await GetAchievementsResponse(bot, gameID);
+        return data;
+    }
+
+    /// <summary>
+    /// 获取用户成就数据
+    /// </summary>
+    /// <param name="bot"></param>
+    /// <param name="gameID"></param>
+    /// <returns></returns>
+    internal Task<(UserStatsData? userStats, uint crc_stats)> GetUserStatsWithCrcStats(Bot bot, ulong gameID)
+    {
+        return GetAchievementsResponse(bot, gameID);
+    }
+
+    /// <summary>
     /// 添加修改的成就
     /// </summary>
     /// <param name="achievements"></param>
     /// <param name="unlock"></param>
-    private Dictionary<uint, CMsgClientStoreUserStats2.Stats> GetEffectAchievementDict(IEnumerable<AchievementData> achievements, bool unlock)
+    private static IDictionary<uint, CMsgClientStoreUserStats2.Stats> GetEffectAchievementDict(HashSet<AchievementData> achievements, bool unlock)
     {
         var effectedStatsDict = new Dictionary<uint, CMsgClientStoreUserStats2.Stats>();
 
@@ -211,7 +239,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
         {
             if (!effectedStatsDict.TryGetValue(achievement.StatId, out var currentstat))
             {
-                currentstat = new CMsgClientStoreUserStats2.Stats()
+                currentstat = new CMsgClientStoreUserStats2.Stats
                 {
                     stat_id = achievement.StatId,
                     stat_value = achievement.StatValue
@@ -246,26 +274,24 @@ internal sealed class AchievementHandler : ClientMsgHandler
     }
 
     /// <summary>
-    /// 获取用户成就数据
+    /// 添加修改的统计项
     /// </summary>
-    /// <param name="bot"></param>
-    /// <param name="gameID"></param>
+    /// <param name="statsList"></param>
+    /// <param name="unlock"></param>
     /// <returns></returns>
-    internal async Task<UserStatsData?> GetUserStats(Bot bot, ulong gameID)
+    private static IList<CMsgClientStoreUserStats2.Stats> GetEffectStatsList(HashSet<StatsData> statsList)
     {
-        var (data, _) = await GetAchievementsResponse(bot, gameID);
-        return data;
-    }
-
-    /// <summary>
-    /// 获取用户成就数据
-    /// </summary>
-    /// <param name="bot"></param>
-    /// <param name="gameID"></param>
-    /// <returns></returns>
-    internal Task<(UserStatsData? userStats, uint crc_stats)> GetUserStatsWithCrcStats(Bot bot, ulong gameID)
-    {
-        return GetAchievementsResponse(bot, gameID);
+        var effectedStatsDict = new List<CMsgClientStoreUserStats2.Stats>();
+        foreach (var stats in statsList)
+        {
+            var currentstat = new CMsgClientStoreUserStats2.Stats
+            {
+                stat_id = stats.Id,
+                stat_value = stats.Value
+            };
+            effectedStatsDict.Add(currentstat);
+        }
+        return effectedStatsDict;
     }
 
     /// <summary>
@@ -277,7 +303,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
     /// <param name="achievements"></param>
     /// <param name="unlock"></param>
     /// <returns></returns>
-    internal async Task<bool?> SetAchievements(Bot bot, uint appId, uint crc_stats, IEnumerable<AchievementData> achievements, bool unlock)
+    internal async Task<bool?> ModifyAchievements(Bot bot, uint appId, uint crc_stats, HashSet<AchievementData> achievements, bool unlock)
     {
         var effectedStatsDict = GetEffectAchievementDict(achievements, unlock);
 
@@ -306,4 +332,40 @@ internal sealed class AchievementHandler : ClientMsgHandler
         }
     }
 
+    /// <summary>
+    /// 修改统计项
+    /// </summary>
+    /// <param name="bot"></param>
+    /// <param name="appId"></param>
+    /// <param name="crc_stats"></param>
+    /// <param name="stats"></param>
+    /// <returns></returns>
+    internal async Task<bool?> ModifyStats(Bot bot, uint appId, uint crc_stats, HashSet<StatsData> stats)
+    {
+        var effectedStatsList = GetEffectStatsList(stats);
+
+        if (effectedStatsList.Any())
+        {
+            var request = new ClientMsgProtobuf<CMsgClientStoreUserStats2>(EMsg.ClientStoreUserStats2)
+            {
+                SourceJobID = Client.GetNextJobID(),
+                Body = {
+                    game_id =  appId,
+                    settor_steam_id = bot.SteamID,
+                    settee_steam_id = bot.SteamID,
+                    explicit_reset = false,
+                    crc_stats =crc_stats
+                }
+            };
+            request.Body.stats.AddRange(effectedStatsList);
+            Client.Send(request);
+
+            var setResponse = await new AsyncJob<SetAchievementsCallback>(Client, request.SourceJobID).ToLongRunningTask().ConfigureAwait(false);
+            return setResponse?.Success;
+        }
+        else
+        {
+            return null;
+        }
+    }
 }

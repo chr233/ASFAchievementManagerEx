@@ -124,7 +124,7 @@
     <value>Error</value>
   </data>
   <data name="PluginContact" xml:space="preserve">
-    <value>Developed by Chr_, email chr@chrxw.com</value>
+    <value>Developed by Rudokhvist, Chr_, email chr@chrxw.com</value>
   </data>
   <data name="PluginVer" xml:space="preserve">
     <value>{0} Version {1}</value>
@@ -178,13 +178,13 @@
     <value> - Version: {0}</value>
   </data>
   <data name="UpdateTips" xml:space="preserve">
-    <value>Use Command "ASFEUPDATE" / "AU" to update this plugin</value>
+    <value>Use Command "AAMUPDATE" / "AAMU" to update this plugin</value>
   </data>
   <data name="ASFEUpdateTips" xml:space="preserve">
-    <value>Use Command "ASFEUPDATE" / "AU" to update the plugin</value>
+    <value>Use Command "AAMUPDATE" / "AAMU" to update the plugin</value>
   </data>
   <data name="ASFEVersionTips" xml:space="preserve">
-    <value>Use Command "ASFEVERSION" / "AV" to check the plugin's latest version</value>
+    <value>Use Command "AAMVERSION" / "AAMV" to check the plugin's latest version</value>
   </data>
   <data name="ArgsIsEmpty" xml:space="preserve">
     <value>Args is empty</value>
@@ -203,9 +203,6 @@
   </data>
   <data name="ErrorLogOriginMessage" xml:space="preserve">
     <value> - Origin Message: {0}</value>
-  </data>
-  <data name="EulaFeatureUnavilable" xml:space="preserve">
-    <value>ASFEnhance.EULA not agreed, this feature is unavilable</value>
   </data>
   <data name="EulaWarning" xml:space="preserve">
     <value>ASFEnhance.EULA not agreed, some features is disabled</value>
@@ -256,9 +253,90 @@
     <value>{0}({1})</value>
   </data>
   <data name="StatsTitle" xml:space="preserve">
-    <value>  Id  [Min Current Max] Name 🔒受保护🔼仅能增加⚠️最大修改量</value>
+    <value>  Id  [Min Current Max] Name 🔒Protected🔼IncreaseOnly⚠️MaxChange</value>
   </data>
   <data name="InternalError" xml:space="preserve">
     <value>Internal Error</value>
+  </data>
+  <data name="CommandDisabled" xml:space="preserve">
+    <value>Command {0} is disabled!</value>
+  </data>
+  <data name="Failure" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="GetAchievementDataFailure" xml:space="preserve">
+    <value>Get App/{0} 's achievement failed</value>
+  </data>
+  <data name="ExecuteResult" xml:space="preserve">
+    <value>Execute result:</value>
+  </data>
+  <data name="AchievementChangeUnnecessary" xml:space="preserve">
+    <value>{0}-{1}: 无需修改该项成就</value>
+  </data>
+  <data name="AchievementIsProtected" xml:space="preserve">
+    <value>{0}-{1}: 无法修改被保护的成就</value>
+  </data>
+  <data name="AchievementIdInvalid" xml:space="preserve">
+    <value>{0}: 无效参数, 需要为整数</value>
+  </data>
+  <data name="AchievementList" xml:space="preserve">
+    <value>App/{0} 的成就列表:</value>
+  </data>
+  <data name="AchievementNotFounf" xml:space="preserve">
+    <value>{0}: 找不到此ID的成就</value>
+  </data>
+  <data name="AchievementItem" xml:space="preserve">
+    <value>- {0,-3} {1} {2}{3}</value>
+  </data>
+  <data name="NoAchievementEffected" xml:space="preserve">
+    <value>无待设置的成就</value>
+  </data>
+  <data name="NoStatsEffected" xml:space="preserve">
+    <value>无待设置的统计项</value>
+  </data>
+  <data name="WarningInfo" xml:space="preserve">
+    <value>Warning info:</value>
+  </data>
+  <data name="StatsItem" xml:space="preserve">
+    <value>- {0,-3} [{1}] {2}{3}{4}{5}</value>
+  </data>
+  <data name="StatsIsProtected" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 无法修改被保护的统计项</value>
+  </data>
+  <data name="StatsIncrementOnlyLimited" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 具有递增限制的统计项无法设置为更低的值 {3}</value>
+  </data>
+  <data name="StatsTargetValueInvalid" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 无法设置为{3}, 参数需要为整数</value>
+  </data>
+  <data name="StatsMaxChangeLimited" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 设定的值 {3} 超过了最大该变量 {4}, 修改为允许的上/下限</value>
+  </data>
+  <data name="StatsList" xml:space="preserve">
+    <value>App/{0} 的统计数据列表:</value>
+  </data>
+  <data name="StatsNotFound" xml:space="preserve">
+    <value>{0}: 找不到此统计项ID</value>
+  </data>
+  <data name="StatsCantSetToMax" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 无法设置为最大值, 最大值为Null</value>
+  </data>
+  <data name="StatsCantSetToDefault" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 无法设置为默认值, 默认值为Null</value>
+  </data>
+  <data name="StatsArgumentInvalid" xml:space="preserve">
+    <value>{0}: 无效参数, 格式为n=x, n为整数, x为整数或d/default(默认值)或i/min(最小值)或a/max(最大值)</value>
+  </data>
+  <data name="StatsCantSetToMin" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 无法设置为最小值, 最小值为Null</value>
+  </data>
+  <data name="StatsChangeUnnecessary" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 无需更改的统计项</value>
+  </data>
+  <data name="SetStatsResult" xml:space="preserve">
+    <value>设置统计项{0}, 受影响统计项 {1} 个</value>
+  </data>
+  <data name="SetAchievementResult" xml:space="preserve">
+    <value>设置成就{0}, 受影响成就 {1} 个</value>
   </data>
 </root>

@@ -124,7 +124,7 @@
     <value>出错</value>
   </data>
   <data name="PluginContact" xml:space="preserve">
-    <value>作者 Chr_, 联系方式 chr@chrxw.com</value>
+    <value>作者 Rudokhvist, Chr_, 联系方式 chr@chrxw.com</value>
   </data>
   <data name="PluginVer" xml:space="preserve">
     <value>{0} 版本 {1}</value>
@@ -178,13 +178,13 @@
     <value> - 版本: {0}</value>
   </data>
   <data name="UpdateTips" xml:space="preserve">
-    <value>可以使用命令 ASFEUPDATE / AU 自动更新插件</value>
+    <value>可以使用命令 AAMUPDATE / AAMU 自动更新插件</value>
   </data>
   <data name="ASFEUpdateTips" xml:space="preserve">
-    <value>使用命令 ASFEUPDATE / AU 自动更新插件</value>
+    <value>使用命令 AAMUPDATE / AAMU 自动更新插件</value>
   </data>
   <data name="ASFEVersionTips" xml:space="preserve">
-    <value>使用命令 ASFEVERSION / AV 检查插件更新</value>
+    <value>使用命令 AAMVERSION / AAMV 检查插件更新</value>
   </data>
   <data name="ArgsIsEmpty" xml:space="preserve">
     <value>参数为空</value>
@@ -203,9 +203,6 @@
   </data>
   <data name="ErrorLogOriginMessage" xml:space="preserve">
     <value> - 原始消息: {0}</value>
-  </data>
-  <data name="EulaFeatureUnavilable" xml:space="preserve">
-    <value>尚未同意 ASFEnhance.EULA , 无法使用IPC功能</value>
   </data>
   <data name="EulaWarning" xml:space="preserve">
     <value>尚未同意 EULA , 部分命令已禁用</value>
@@ -260,5 +257,86 @@
   </data>
   <data name="InternalError" xml:space="preserve">
     <value>内部错误</value>
+  </data>
+  <data name="CommandDisabled" xml:space="preserve">
+    <value>命令 {0} 被禁用!</value>
+  </data>
+  <data name="Failure" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="GetAchievementDataFailure" xml:space="preserve">
+    <value>获取 App/{0} 的成就数据失败</value>
+  </data>
+  <data name="ExecuteResult" xml:space="preserve">
+    <value>执行结果:</value>
+  </data>
+  <data name="AchievementIsProtected" xml:space="preserve">
+    <value>{0}-{1}: 无法修改被保护的成就</value>
+  </data>
+  <data name="AchievementChangeUnnecessary" xml:space="preserve">
+    <value>{0}-{1}: 无需修改该项成就</value>
+  </data>
+  <data name="AchievementIdInvalid" xml:space="preserve">
+    <value>{0}: 无效参数, 需要为整数</value>
+  </data>
+  <data name="AchievementList" xml:space="preserve">
+    <value>App/{0} 的成就列表:</value>
+  </data>
+  <data name="AchievementNotFounf" xml:space="preserve">
+    <value>{0}: 找不到此ID的成就</value>
+  </data>
+  <data name="AchievementItem" xml:space="preserve">
+    <value>- {0,-3} {1} {2}{3}</value>
+  </data>
+  <data name="NoAchievementEffected" xml:space="preserve">
+    <value>无待设置的成就</value>
+  </data>
+  <data name="NoStatsEffected" xml:space="preserve">
+    <value>无待设置的统计项</value>
+  </data>
+  <data name="WarningInfo" xml:space="preserve">
+    <value>警告信息:</value>
+  </data>
+  <data name="StatsItem" xml:space="preserve">
+    <value>- {0,-3} [{1}] {2}{3}{4}{5}</value>
+  </data>
+  <data name="StatsIsProtected" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 无法修改被保护的统计项</value>
+  </data>
+  <data name="StatsIncrementOnlyLimited" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 具有递增限制的统计项无法设置为更低的值 {3}</value>
+  </data>
+  <data name="StatsTargetValueInvalid" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 无法设置为{3}, 参数需要为整数</value>
+  </data>
+  <data name="StatsMaxChangeLimited" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 设定的值 {3} 超过了最大该变量 {4}, 修改为允许的上/下限</value>
+  </data>
+  <data name="StatsList" xml:space="preserve">
+    <value>App/{0} 的统计数据列表:</value>
+  </data>
+  <data name="StatsNotFound" xml:space="preserve">
+    <value>{0}: 找不到此统计项ID</value>
+  </data>
+  <data name="StatsCantSetToMax" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 无法设置为最大值, 最大值为Null</value>
+  </data>
+  <data name="StatsCantSetToDefault" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 无法设置为默认值, 默认值为Null</value>
+  </data>
+  <data name="StatsArgumentInvalid" xml:space="preserve">
+    <value>{0}: 无效参数, 格式为n=x, n为整数, x为整数或d/default(默认值)或i/min(最小值)或a/max(最大值)</value>
+  </data>
+  <data name="StatsCantSetToMin" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 无法设置为最小值, 最小值为Null</value>
+  </data>
+  <data name="StatsChangeUnnecessary" xml:space="preserve">
+    <value>{0}-{1} [{2}]: 无需更改的统计项</value>
+  </data>
+  <data name="SetStatsResult" xml:space="preserve">
+    <value>设置统计项{0}, 受影响统计项 {1} 个</value>
+  </data>
+  <data name="SetAchievementResult" xml:space="preserve">
+    <value>设置成就{0}, 受影响成就 {1} 个</value>
   </data>
 </root>
