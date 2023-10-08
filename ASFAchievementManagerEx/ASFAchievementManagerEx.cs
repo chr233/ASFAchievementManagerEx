@@ -174,18 +174,15 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
             1 => cmd switch
             {
                 //Update
-                "ASFACHIEVEMENTMANAGER" when access >= EAccess.FamilySharing =>
-                    Task.FromResult(Update.Command.ResponseASFEnhanceVersion()),
+                "ASFACHIEVEMENTMANAGER" or
                 "AAM" when access >= EAccess.FamilySharing =>
                     Task.FromResult(Update.Command.ResponseASFEnhanceVersion()),
 
-                "AAMVERSION" when access >= EAccess.Operator =>
-                    Update.Command.ResponseCheckLatestVersion(),
+                "AAMVERSION" or
                 "AAMV" when access >= EAccess.Operator =>
                     Update.Command.ResponseCheckLatestVersion(),
 
-                "AAMUPDATE" when access >= EAccess.Owner =>
-                    Update.Command.ResponseUpdatePlugin(),
+                "AAMUPDATE"or
                 "AAMU" when access >= EAccess.Owner =>
                     Update.Command.ResponseUpdatePlugin(),
 
@@ -203,21 +200,17 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
                 "ASTATS" when argLength > 1 && access >= EAccess.Operator =>
                     Command.ResponseGetStatsList(bot, args[1]),
 
-                "ASET" when argLength > 3 && access >= EAccess.Master =>
-                    Command.ResponseSetAchievement(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), true),
+                "ASET" or
                 "AUNLOCK" when argLength > 3 && access >= EAccess.Master =>
                      Command.ResponseSetAchievement(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), true),
-                "ASET" when argLength > 2 && access >= EAccess.Master =>
-                    Command.ResponseSetAchievement(bot, args[2], Utilities.GetArgsAsText(args, 2, ","), true),
+                "ASET" or
                 "AUNLOCK" when argLength > 2 && access >= EAccess.Master =>
                     Command.ResponseSetAchievement(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), true),
 
-                "ARESET" when argLength > 3 && access >= EAccess.Master =>
-                    Command.ResponseSetAchievement(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), false),
+                "ARESET" or
                 "ALOCK" when argLength > 3 && access >= EAccess.Master =>
                     Command.ResponseSetAchievement(args[1], args[2], Utilities.GetArgsAsText(args, 3, ","), false),
-                "ARESET" when argLength > 2 && access >= EAccess.Master =>
-                    Command.ResponseSetAchievement(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), false),
+                "ARESET" or
                 "ALOCK" when argLength > 2 && access >= EAccess.Master =>
                     Command.ResponseSetAchievement(bot, args[1], Utilities.GetArgsAsText(args, 2, ","), false),
 
