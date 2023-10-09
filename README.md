@@ -33,7 +33,8 @@
 
 1. 从 [GitHub Releases](https://github.com/chr233/ASFAchievementManagerEx/releases) 下载插件的最新版本
 2. 解压后将 `ASFAchievementManagerEx.dll` 丢进 `ArchiSteamFarm` 目录下的 `plugins` 文件夹
-3. 重新启动 `ArchiSteamFarm` , 使用命令 `AAM` 来检查插件是否正常工作
+3. 考虑到修改成就具有一定风险, 需要同意 `EULA` 后方可使用所有命令, 参考 [插件配置说明](#插件配置说明)
+4. 重新启动 `ArchiSteamFarm` , 使用命令 `AAM` 来检查插件是否正常工作
 
 ### 使用命令升级插件
 
