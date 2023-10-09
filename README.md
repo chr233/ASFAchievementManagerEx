@@ -2,7 +2,7 @@
 
 > 基于 [Rudokhvist/ASF-Achievement-Manager](https://github.com/Rudokhvist/ASF-Achievement-Manager) 二次开发
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/3d174e792fd4412bb6b34a77d67e5dea)](https://www.codacy.com/gh/chr233/ASFAchievementManagerEx/dashboard)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/bb9315f60f9742dd94651c5d09fe1310)](https://www.codacy.com/gh/chr233/ASFAchievementManagerEx/dashboard)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/chr233/ASFAchievementManagerEx/publish.yml?logo=github)
 [![License](https://img.shields.io/github/license/chr233/ASFAchievementManagerEx?logo=apache)](https://github.com/chr233/ASFAchievementManagerEx/blob/master/license)
 
