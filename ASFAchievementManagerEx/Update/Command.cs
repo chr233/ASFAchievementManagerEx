@@ -1,6 +1,3 @@
-using System.IO.Compression;
-using System.Text;
-
 namespace ASFAchievementManagerEx.Update;
 
 internal static class Command
