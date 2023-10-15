@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using SteamKit2;
 using System.ComponentModel;
 using System.Composition;
+using System.Reflection;
 using System.Text;
 
 namespace ASFAchievementManagerEx;
@@ -16,6 +17,8 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
 {
     public string Name => "ASF Achievemenevement Manager Ex";
     public Version Version => MyVersion;
+
+    private AdapterBtidge? ASFEBridge = null;
 
     [JsonProperty]
     public static PluginConfig Config => Utils.Config;
@@ -103,42 +106,23 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
     /// <returns></returns>
     public Task OnLoaded()
     {
-        var message = new StringBuilder("\n");
-        message.AppendLine(Static.Line);
-        message.AppendLine(Static.Logo);
-        message.AppendLine(Static.Line);
-        message.AppendLineFormat(Langs.PluginVer, nameof(ASFAchievementManagerEx), MyVersion);
-        message.AppendLine(Langs.PluginContact);
-        message.AppendLine(Langs.PluginInfo);
-
-        message.AppendLine(Static.Line);
-
-        var pluginFolder = Path.GetDirectoryName(MyLocation) ?? ".";
-        var backupPath = Path.Combine(pluginFolder, $"{nameof(ASFAchievementManagerEx)}.bak");
-
-        if (File.Exists(backupPath))
+        try
         {
-            try
-            {
-                File.Delete(backupPath);
-                message.AppendLine(Langs.CleanUpOldBackup);
-            }
-            catch (Exception e)
-            {
-                ASFLogger.LogGenericException(e);
-                message.AppendLine(Langs.CleanUpOldBackupFailed);
-            }
+            var flag = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+            var handler = typeof(ASFAchievementManagerEx).GetMethod(nameof(ResponseCommand), flag);
+
+            const string pluginName = nameof(ASFAchievementManagerEx);
+            const string cmdPrefix = "AAM";
+            const string repoName = "ASFAchievementManagerEx";
+
+            ASFEBridge = AdapterBtidge.InitAdapter(pluginName, cmdPrefix, repoName, handler);
+            ASF.ArchiLogger.LogGenericDebug(ASFEBridge != null ? "ASFEBridge 注册成功" : "ASFEBridge 注册失败");
         }
-        else
+        catch (Exception ex)
         {
-            message.AppendLine(Langs.ASFEVersionTips);
-            message.AppendLine(Langs.ASFEUpdateTips);
+            ASF.ArchiLogger.LogGenericDebug("ASFEBridge 注册出错");
+            ASF.ArchiLogger.LogGenericException(ex);
         }
-
-        message.AppendLine(Static.Line);
-
-        ASFLogger.LogGenericInfo(message.ToString());
-
         return Task.CompletedTask;
     }
 
@@ -149,24 +133,8 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
     /// <param name="access"></param>
     /// <param name="args"></param>
     /// <returns></returns>
-    private static Task<string?>? ResponseCommand(Bot bot, EAccess access, string[] args)
+    private static Task<string?>? ResponseCommand(Bot bot, EAccess access, string cmd, string[] args)
     {
-        var cmd = args[0].ToUpperInvariant();
-
-        if (cmd.StartsWith("AAM."))
-        {
-            cmd = cmd[5..];
-        }
-        else
-        {
-            //跳过禁用命令
-            if (Config.DisabledCmds?.Contains(cmd) == true)
-            {
-                ASFLogger.LogGenericInfo(Langs.CommandDisabled);
-                return null;
-            }
-        }
-
         var argLength = args.Length;
         return argLength switch
         {
@@ -177,14 +145,6 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
                 "ASFACHIEVEMENTMANAGER" or
                 "AAM" when access >= EAccess.FamilySharing =>
                     Task.FromResult(Update.Command.ResponseASFEnhanceVersion()),
-
-                "AAMVERSION" or
-                "AAMV" when access >= EAccess.Operator =>
-                    Update.Command.ResponseCheckLatestVersion(),
-
-                "AAMUPDATE"or
-                "AAMU" when access >= EAccess.Owner =>
-                    Update.Command.ResponseUpdatePlugin(),
 
                 _ => null,
             },
@@ -225,6 +185,60 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
     }
 
     /// <summary>
+    /// 处理命令事件
+    /// </summary>
+    /// <param name="bot"></param>
+    /// <param name="access"></param>
+    /// <param name="message"></param>
+    /// <param name="args"></param>
+    /// <param name="steamId"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidEnumArgumentException"></exception>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task<string?> OnBotCommand(Bot bot, EAccess access, string message, string[] args, ulong steamId = 0)
+    {
+        if (ASFEBridge != null)
+        {
+            return null;
+        }
+
+        if (!Enum.IsDefined(access))
+        {
+            throw new InvalidEnumArgumentException(nameof(access), (int)access, typeof(EAccess));
+        }
+
+        try
+        {
+            var cmd = args[0].ToUpperInvariant();
+
+            if (cmd.StartsWith("DEMO."))
+            {
+                cmd = cmd[5..];
+            }
+
+            var task = ResponseCommand(bot, access, cmd, args);
+            if (task != null)
+            {
+                return await task.ConfigureAwait(false);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(500).ConfigureAwait(false);
+                Utils.ASFLogger.LogGenericException(ex);
+            }).ConfigureAwait(false);
+
+            return ex.StackTrace;
+        }
+    }
+
+    /// <summary>
     /// 初始化机回调接收器
     /// </summary>
     /// <param name="bot"></param>
@@ -246,77 +260,5 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
         Command.Handlers.TryAdd(bot, botHandler);
         var handlers = new ClientMsgHandler[] { botHandler };
         return Task.FromResult<IReadOnlyCollection<ClientMsgHandler>?>(handlers);
-    }
-
-    /// <summary>
-    /// 处理命令事件
-    /// </summary>
-    /// <param name="bot"></param>
-    /// <param name="access"></param>
-    /// <param name="message"></param>
-    /// <param name="args"></param>
-    /// <param name="steamId"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidEnumArgumentException"></exception>
-    /// <exception cref="InvalidOperationException"></exception>
-    public async Task<string?> OnBotCommand(Bot bot, EAccess access, string message, string[] args, ulong steamId = 0)
-    {
-        if (!Enum.IsDefined(access))
-        {
-            throw new InvalidEnumArgumentException(nameof(access), (int)access, typeof(EAccess));
-        }
-
-        try
-        {
-            var task = ResponseCommand(bot, access, args);
-            if (task != null)
-            {
-                if (Config.EULA)
-                {
-                    return await task.ConfigureAwait(false);
-                }
-                else
-                {
-                    return FormatStaticResponse(Langs.EulaCmdUnavilable);
-                }
-            }
-            else
-            {
-                return null;
-            }
-        }
-        catch (Exception ex)
-        {
-            var version = await bot.Commands.Response(EAccess.Owner, "VERSION") ?? "UNKNOWN";
-            var i = version.LastIndexOf('V');
-            if (i >= 0)
-            {
-                version = version[++i..];
-            }
-            var cfg = JsonConvert.SerializeObject(Config, Formatting.Indented);
-
-            var sb = new StringBuilder();
-            sb.AppendLine(Langs.ErrorLogTitle);
-            sb.AppendLine(Static.Line);
-            sb.AppendLineFormat(Langs.ErrorLogOriginMessage, message);
-            sb.AppendLineFormat(Langs.ErrorLogAccess, access.ToString());
-            sb.AppendLineFormat(Langs.ErrorLogASFVersion, version);
-            sb.AppendLineFormat(Langs.ErrorLogPluginVersion, MyVersion);
-            sb.AppendLine(Static.Line);
-            sb.AppendLine(cfg);
-            sb.AppendLine(Static.Line);
-            sb.AppendLineFormat(Langs.ErrorLogErrorName, ex.GetType());
-            sb.AppendLineFormat(Langs.ErrorLogErrorMessage, ex.Message);
-            sb.AppendLine(ex.StackTrace);
-
-            _ = Task.Run(async () =>
-            {
-                await Task.Delay(500);
-                sb.Insert(0, '\n');
-                ASFLogger.LogGenericError(sb.ToString());
-            });
-
-            return sb.ToString();
-        }
     }
 }
