@@ -19,6 +19,8 @@
 [![Steam](https://img.shields.io/badge/steam-donate-1B2838.svg?logo=steam)](https://steamcommunity.com/tradeoffer/new/?partner=221260487&token=xgqMgL-i)
 [![爱发电](https://img.shields.io/badge/爱发电-chr__-ea4aaa.svg?logo=github-sponsors)](https://afdian.net/@chr233)
 
+[中文说明](README.md)
+
 ## ЛИЦЕНЗИОННОЕ СОГЛАШЕНИЕ
 
 > Изменение статистики/достижений является рискованным, изменение статистики/достижений в играх, защищенных VAC, может быть споводовать VAC бан.
