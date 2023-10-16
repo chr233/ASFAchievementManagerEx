@@ -18,7 +18,7 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
     public string Name => "ASF Achievemenevement Manager Ex";
     public Version Version => MyVersion;
 
-    private AdapterBtidge? ASFEBridge = null;
+    private bool ASFEBridge;
 
     [JsonProperty]
     public static PluginConfig Config => Utils.Config;
@@ -32,15 +32,13 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
     /// <returns></returns>
     public Task OnASFInit(IReadOnlyDictionary<string, JToken>? additionalConfigProperties = null)
     {
-        var sb = new StringBuilder();
-
         PluginConfig? config = null;
 
         if (additionalConfigProperties != null)
         {
             foreach ((string configProperty, JToken configValue) in additionalConfigProperties)
             {
-                if (configProperty == "ASFAchievementManagerEx" && configValue.Type == JTokenType.Object)
+                if (configProperty == "ASFEnhance" && configValue.Type == JTokenType.Object)
                 {
                     try
                     {
@@ -60,13 +58,15 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
 
         Utils.Config = config ?? new();
 
+        var sb = new StringBuilder();
+
         //使用协议
         if (!Config.EULA)
         {
             sb.AppendLine();
-            sb.AppendLine(Static.Line);
+            sb.AppendLine(Langs.Line);
             sb.AppendLineFormat(Langs.EulaWarning, nameof(ASFAchievementManagerEx));
-            sb.AppendLine(Static.Line);
+            sb.AppendLine(Langs.Line);
         }
 
         if (sb.Length > 0)
@@ -78,23 +78,11 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
         {
             var request = new Uri("https://asfe.chrxw.com/asfachievemenevementmanagerex");
             StatisticTimer = new Timer(
-                async (_) => await ASF.WebBrowser!.UrlGetToHtmlDocument(request),
+                async (_) => await ASF.WebBrowser!.UrlGetToHtmlDocument(request).ConfigureAwait(false),
                 null,
                 TimeSpan.FromSeconds(30),
                 TimeSpan.FromHours(24)
             );
-        }
-        //禁用命令
-        if (Config.DisabledCmds == null)
-        {
-            Config.DisabledCmds = new();
-        }
-        else
-        {
-            for (int i = 0; i < Config.DisabledCmds.Count; i++)
-            {
-                Config.DisabledCmds[i] = Config.DisabledCmds[i].ToUpperInvariant();
-            }
         }
 
         return Task.CompletedTask;
@@ -106,25 +94,35 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
     /// <returns></returns>
     public Task OnLoaded()
     {
-        try
-        {
-            var flag = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-            var handler = typeof(ASFAchievementManagerEx).GetMethod(nameof(ResponseCommand), flag);
+        ASFLogger.LogGenericInfo(Langs.PluginContact);
+        ASFLogger.LogGenericInfo(Langs.PluginInfo);
 
-            const string pluginName = nameof(ASFAchievementManagerEx);
-            const string cmdPrefix = "AAM";
-            const string repoName = "ASFAchievementManagerEx";
+        var flag = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+        var handler = typeof(ASFAchievementManagerEx).GetMethod(nameof(ResponseCommand), flag);
 
-            ASFEBridge = AdapterBtidge.InitAdapter(pluginName, cmdPrefix, repoName, handler);
-            ASF.ArchiLogger.LogGenericDebug(ASFEBridge != null ? "ASFEBridge 注册成功" : "ASFEBridge 注册失败");
-        }
-        catch (Exception ex)
+        const string pluginName = nameof(ASFAchievementManagerEx);
+        const string cmdPrefix = "AAM";
+        const string repoName = "ASFAchievementManagerEx";
+
+        ASFEBridge = AdapterBtidge.InitAdapter(pluginName, cmdPrefix, repoName, handler);
+
+        if (ASFEBridge)
         {
-            ASF.ArchiLogger.LogGenericDebug("ASFEBridge 注册出错");
-            ASF.ArchiLogger.LogGenericException(ex);
+            ASFLogger.LogGenericDebug(Langs.ASFEnhanceRegisterSuccess);
         }
+        else
+        {
+            ASFLogger.LogGenericInfo(Langs.ASFEnhanceRegisterFailed);
+            ASFLogger.LogGenericWarning(Langs.PluginStandalongMode);
+        }
+
         return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// 获取插件信息
+    /// </summary>
+    private static string? PluginInfo => string.Format("{0} {1}", nameof(ASFAchievementManagerEx), MyVersion);
 
     /// <summary>
     /// 处理命令
@@ -141,10 +139,10 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
             0 => throw new InvalidOperationException(nameof(args)),
             1 => cmd switch
             {
-                //Update
+                //Plugin Info
                 "ASFACHIEVEMENTMANAGER" or
                 "AAM" when access >= EAccess.FamilySharing =>
-                    Task.FromResult(Update.Command.ResponseASFEnhanceVersion()),
+                    Task.FromResult(PluginInfo),
 
                 _ => null,
             },
@@ -197,7 +195,7 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
     /// <exception cref="InvalidOperationException"></exception>
     public async Task<string?> OnBotCommand(Bot bot, EAccess access, string message, string[] args, ulong steamId = 0)
     {
-        if (ASFEBridge != null)
+        if (ASFEBridge)
         {
             return null;
         }
@@ -211,9 +209,9 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
         {
             var cmd = args[0].ToUpperInvariant();
 
-            if (cmd.StartsWith("DEMO."))
+            if (cmd.StartsWith("AAM."))
             {
-                cmd = cmd[5..];
+                cmd = cmd[4..];
             }
 
             var task = ResponseCommand(bot, access, cmd, args);
@@ -231,7 +229,7 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
             _ = Task.Run(async () =>
             {
                 await Task.Delay(500).ConfigureAwait(false);
-                Utils.ASFLogger.LogGenericException(ex);
+                ASFLogger.LogGenericException(ex);
             }).ConfigureAwait(false);
 
             return ex.StackTrace;

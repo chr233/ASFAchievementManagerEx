@@ -126,9 +126,6 @@
   <data name="PluginContact" xml:space="preserve">
     <value>Developed by Rudokhvist, Chr_, email chr@chrxw.com</value>
   </data>
-  <data name="PluginVer" xml:space="preserve">
-    <value>{0} Version {1}</value>
-  </data>
   <data name="Success" xml:space="preserve">
     <value>Success</value>
   </data>
@@ -151,103 +148,25 @@
     <value>Parse Html failed!</value>
   </data>
   <data name="PluginInfo" xml:space="preserve">
-    <value>https://afdian.net/@chr233</value>
-  </data>
-  <data name="ErrorLogPluginVersion" xml:space="preserve">
-    <value> - Plugin Version: {0}</value>
-  </data>
-  <data name="ASFECurrentVersion" xml:space="preserve">
-    <value>Current version: {0}</value>
-  </data>
-  <data name="ASFEOnlineVersion" xml:space="preserve">
-    <value>Latest Version: {0}</value>
-  </data>
-  <data name="ASFEPluginVersion" xml:space="preserve">
-    <value> - Plugin version: {0}</value>
+    <value>Donate: https://afdian.net/@chr233</value>
   </data>
   <data name="NoArgs" xml:space="preserve">
     <value>No args</value>
   </data>
-  <data name="UpdateSuccess" xml:space="preserve">
-    <value>Plugin update finished, restart ASF to apply update, if not compatible, please also update the ASF</value>
-  </data>
-  <data name="UpdateFiledWithZip" xml:space="preserve">
-    <value>Plugin update failed, unzip failed</value>
-  </data>
-  <data name="Version" xml:space="preserve">
-    <value> - Version: {0}</value>
-  </data>
-  <data name="UpdateTips" xml:space="preserve">
-    <value>Use Command "AAMUPDATE" / "AAMU" to update this plugin</value>
-  </data>
-  <data name="ASFEUpdateTips" xml:space="preserve">
-    <value>Use Command "AAMUPDATE" / "AAMU" to update the plugin</value>
-  </data>
-  <data name="ASFEVersionTips" xml:space="preserve">
-    <value>Use Command "AAMVERSION" / "AAMV" to check the plugin's latest version</value>
-  </data>
   <data name="ArgsIsEmpty" xml:space="preserve">
     <value>Args is empty</value>
-  </data>
-  <data name="ErrorLogAccess" xml:space="preserve">
-    <value> - Access: {0}</value>
-  </data>
-  <data name="ErrorLogTitle" xml:space="preserve">
-    <value>ASFenhance encountered error, error logs below</value>
-  </data>
-  <data name="ErrorLogASFVersion" xml:space="preserve">
-    <value> - ASF Version: {0}</value>
-  </data>
-  <data name="ErrorLogErrorName" xml:space="preserve">
-    <value> - Exception Type: {0}</value>
-  </data>
-  <data name="ErrorLogOriginMessage" xml:space="preserve">
-    <value> - Origin Message: {0}</value>
   </data>
   <data name="EulaWarning" xml:space="preserve">
     <value>{0}: ASFEnhance.EULA not agreed, some features is disabled</value>
   </data>
-  <data name="ErrorLogErrorMessage" xml:space="preserve">
-    <value> - Exception Message: {0}</value>
-  </data>
   <data name="EulaCmdUnavilable" xml:space="preserve">
     <value>ASFEnhance.EULA not agreed, this feature is unavilable</value>
-  </data>
-  <data name="Assert" xml:space="preserve">
-    <value> - Assets: </value>
-  </data>
-  <data name="GetReleaseInfoFailed" xml:space="preserve">
-    <value>Failed to fetch the release information!</value>
-  </data>
-  <data name="Detail" xml:space="preserve">
-    <value> - Detail: {0}</value>
-  </data>
-  <data name="SubSize" xml:space="preserve">
-    <value>   - Size: {0:0.000} KB</value>
-  </data>
-  <data name="SubName" xml:space="preserve">
-    <value>   - Name: {0}</value>
-  </data>
-  <data name="SubLink" xml:space="preserve">
-    <value>   - Link: {0}</value>
-  </data>
-  <data name="AlreadyLatest" xml:space="preserve">
-    <value>The plugin is up to date, no need to update</value>
   </data>
   <data name="CurrentLanguage" xml:space="preserve">
     <value>en-US</value>
   </data>
-  <data name="DownloadFailed" xml:space="preserve">
-    <value>Download plugin failed!</value>
-  </data>
   <data name="Language" xml:space="preserve">
     <value>english</value>
-  </data>
-  <data name="CleanUpOldBackup" xml:space="preserve">
-    <value>Clear the old plugin's backup file success</value>
-  </data>
-  <data name="CleanUpOldBackupFailed" xml:space="preserve">
-    <value>Clear the old plugin's backup file failed</value>
   </data>
   <data name="MaxChange" xml:space="preserve">
     <value>{0}({1})</value>
@@ -338,5 +257,32 @@
   </data>
   <data name="SetAchievementResult" xml:space="preserve">
     <value>设置成就{0}, 受影响成就 {1} 个</value>
+  </data>
+  <data name="PluginStandalongMode" xml:space="preserve">
+    <value>推荐安装 ASFEnhance, 支持自动更新插件</value>
+  </data>
+  <data name="Line" xml:space="preserve">
+    <value>==========================================</value>
+  </data>
+  <data name="ASFEnhanceRegisterFailed" xml:space="preserve">
+    <value>ASFEBridge 注册失败</value>
+  </data>
+  <data name="ASFEnhanceRegisterSuccess" xml:space="preserve">
+    <value>ASFEBridge 注册成功</value>
+  </data>
+  <data name="EmojiNo" xml:space="preserve">
+    <value>❌</value>
+  </data>
+  <data name="EmojiLock" xml:space="preserve">
+    <value>🔒</value>
+  </data>
+  <data name="EmojiWarning" xml:space="preserve">
+    <value>⚠️</value>
+  </data>
+  <data name="EmojiYes" xml:space="preserve">
+    <value>✅</value>
+  </data>
+  <data name="EmojiIncrementOnly" xml:space="preserve">
+    <value>🔼</value>
   </data>
 </root>

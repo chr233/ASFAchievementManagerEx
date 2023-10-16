@@ -124,10 +124,7 @@
     <value>出错</value>
   </data>
   <data name="PluginContact" xml:space="preserve">
-    <value>作者 Rudokhvist, Chr_, 联系方式 chr@chrxw.com</value>
-  </data>
-  <data name="PluginVer" xml:space="preserve">
-    <value>{0} 版本 {1}</value>
+    <value>插件作者: Rudokhvist, Chr_, 联系方式: chr@chrxw.com</value>
   </data>
   <data name="Success" xml:space="preserve">
     <value>成功</value>
@@ -156,98 +153,20 @@
   <data name="NoArgs" xml:space="preserve">
     <value>无参数</value>
   </data>
-  <data name="ASFECurrentVersion" xml:space="preserve">
-    <value>当前版本: {0}</value>
-  </data>
-  <data name="ErrorLogPluginVersion" xml:space="preserve">
-    <value> - 插件版本: {0}</value>
-  </data>
-  <data name="ASFEPluginVersion" xml:space="preserve">
-    <value> - 插件版本: {0}</value>
-  </data>
-  <data name="ASFEOnlineVersion" xml:space="preserve">
-    <value>在线版本: {0}</value>
-  </data>
-  <data name="Version" xml:space="preserve">
-    <value> - 版本: {0}</value>
-  </data>
-  <data name="UpdateTips" xml:space="preserve">
-    <value>可以使用命令 AAMUPDATE / AAMU 自动更新插件</value>
-  </data>
-  <data name="UpdateSuccess" xml:space="preserve">
-    <value>插件更新完成, 重启ASF即可应用, 如果不兼容请更新ASF版本</value>
-  </data>
-  <data name="UpdateFiledWithZip" xml:space="preserve">
-    <value>插件更新失败, 压缩包内容解析失败</value>
-  </data>
-  <data name="ASFEVersionTips" xml:space="preserve">
-    <value>使用命令 AAMVERSION / AAMV 检查插件更新</value>
-  </data>
-  <data name="ASFEUpdateTips" xml:space="preserve">
-    <value>使用命令 AAMUPDATE / AAMU 自动更新插件</value>
-  </data>
   <data name="ArgsIsEmpty" xml:space="preserve">
     <value>参数为空</value>
-  </data>
-  <data name="ErrorLogTitle" xml:space="preserve">
-    <value>ASFenhance 遇到错误, 日志如下</value>
-  </data>
-  <data name="ErrorLogOriginMessage" xml:space="preserve">
-    <value> - 原始消息: {0}</value>
-  </data>
-  <data name="ErrorLogAccess" xml:space="preserve">
-    <value> - Access: {0}</value>
-  </data>
-  <data name="ErrorLogASFVersion" xml:space="preserve">
-    <value> - ASF 版本: {0}</value>
-  </data>
-  <data name="ErrorLogErrorName" xml:space="preserve">
-    <value> - 错误类型: {0}</value>
   </data>
   <data name="EulaWarning" xml:space="preserve">
     <value>{0}: 尚未同意 EULA , 部分命令已禁用</value>
   </data>
-  <data name="ErrorLogErrorMessage" xml:space="preserve">
-    <value> - 错误消息: {0}</value>
-  </data>
   <data name="EulaCmdUnavilable" xml:space="preserve">
     <value>尚未同意 ASFEnhance.EULA , 该命令不可用</value>
-  </data>
-  <data name="Assert" xml:space="preserve">
-    <value> - 附件: </value>
-  </data>
-  <data name="GetReleaseInfoFailed" xml:space="preserve">
-    <value>读取插件发行版信息失败!</value>
-  </data>
-  <data name="Detail" xml:space="preserve">
-    <value> - 描述: {0}</value>
-  </data>
-  <data name="SubSize" xml:space="preserve">
-    <value>   - 尺寸: {0:0.000} KB</value>
-  </data>
-  <data name="SubName" xml:space="preserve">
-    <value>   - 名称: {0}</value>
-  </data>
-  <data name="SubLink" xml:space="preserve">
-    <value>   - 链接: {0}</value>
-  </data>
-  <data name="AlreadyLatest" xml:space="preserve">
-    <value>当前已经是最新版本, 无需更新插件</value>
   </data>
   <data name="CurrentLanguage" xml:space="preserve">
     <value>zh-Hans</value>
   </data>
-  <data name="DownloadFailed" xml:space="preserve">
-    <value>下载插件失败!</value>
-  </data>
   <data name="Language" xml:space="preserve">
     <value>schinese</value>
-  </data>
-  <data name="CleanUpOldBackup" xml:space="preserve">
-    <value>旧的插件备份已经自动清理</value>
-  </data>
-  <data name="CleanUpOldBackupFailed" xml:space="preserve">
-    <value>旧的插件备份清理失败</value>
   </data>
   <data name="MaxChange" xml:space="preserve">
     <value>{0}({1})</value>
@@ -338,5 +257,32 @@
   </data>
   <data name="NoStatsEffected" xml:space="preserve">
     <value>无待设置的统计项</value>
+  </data>
+  <data name="PluginStandalongMode" xml:space="preserve">
+    <value>推荐安装 ASFEnhance, 支持自动更新插件</value>
+  </data>
+  <data name="Line" xml:space="preserve">
+    <value>==========================================</value>
+  </data>
+  <data name="ASFEnhanceRegisterFailed" xml:space="preserve">
+    <value>ASFEBridge 注册失败</value>
+  </data>
+  <data name="ASFEnhanceRegisterSuccess" xml:space="preserve">
+    <value>ASFEBridge 注册成功</value>
+  </data>
+  <data name="EmojiYes" xml:space="preserve">
+    <value>✅</value>
+  </data>
+  <data name="EmojiWarning" xml:space="preserve">
+    <value>⚠️</value>
+  </data>
+  <data name="EmojiNo" xml:space="preserve">
+    <value>❌</value>
+  </data>
+  <data name="EmojiLock" xml:space="preserve">
+    <value>🔒</value>
+  </data>
+  <data name="EmojiIncrementOnly" xml:space="preserve">
+    <value>🔼</value>
   </data>
 </root>

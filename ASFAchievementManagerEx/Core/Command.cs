@@ -48,9 +48,9 @@ internal static class Command
                         sb.AppendLineFormat(
                             Langs.AchievementItem,
                             id++,
-                            achievement.IsUnlock ? Static.Yes : Static.No,
+                            achievement.IsUnlock ? Langs.EmojiYes : Langs.EmojiNo,
                             achievement.Name,
-                            achievement.IsProtected ? Static.Lock : ""
+                            achievement.IsProtected ? Langs.EmojiLock : ""
                         );
                     }
                 }
@@ -132,9 +132,9 @@ internal static class Command
                             id,
                             stats.StrValue,
                             stats.Name,
-                            stats.IsProtected ? Static.Lock : "",
-                            stats.IsIncrementOnly ? Static.IncrementOnly : "",
-                            stats.MaxChange != null ? string.Format(Langs.MaxChange, Static.Warning, stats.MaxChange) : ""
+                            stats.IsProtected ? Langs.EmojiLock : "",
+                            stats.IsIncrementOnly ? Langs.EmojiIncrementOnly : "",
+                            stats.MaxChange != null ? string.Format(Langs.MaxChange, Langs.EmojiWarning, stats.MaxChange) : ""
                         );
                     }
                 }

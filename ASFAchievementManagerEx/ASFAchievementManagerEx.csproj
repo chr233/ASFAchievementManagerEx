@@ -35,20 +35,11 @@
 	    <DesignTime>True</DesignTime>
 	    <AutoGen>True</AutoGen>
 	  </Compile>
-	  <Compile Update="Localization\Static.Designer.cs">
-	    <DependentUpon>Static.resx</DependentUpon>
-	    <DesignTime>True</DesignTime>
-	    <AutoGen>True</AutoGen>
-	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
 	  <EmbeddedResource Update="Localization\Langs.resx">
 	    <LastGenOutput>Langs.Designer.cs</LastGenOutput>
-	    <Generator>ResXFileCodeGenerator</Generator>
-	  </EmbeddedResource>
-	  <EmbeddedResource Update="Localization\Static.resx">
-	    <LastGenOutput>Static.Designer.cs</LastGenOutput>
 	    <Generator>ResXFileCodeGenerator</Generator>
 	  </EmbeddedResource>
 	</ItemGroup>
