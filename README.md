@@ -19,6 +19,8 @@
 [![Steam](https://img.shields.io/badge/steam-donate-1B2838.svg?logo=steam)](https://steamcommunity.com/tradeoffer/new/?partner=221260487&token=xgqMgL-i)
 [![爱发电](https://img.shields.io/badge/爱发电-chr__-ea4aaa.svg?logo=github-sponsors)](https://afdian.net/@chr233)
 
+[Русская Версия](README.ru.md)
+
 ## EULA
 
 > 修改统计信息/成就具有一定风险, 修改有 VAC 保护的游戏的统计信息/成就可能会被封禁
