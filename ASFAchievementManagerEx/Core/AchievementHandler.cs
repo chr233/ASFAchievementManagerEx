@@ -211,7 +211,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
     /// <returns></returns>
     internal async Task<UserStatsData?> GetUserStats(Bot bot, ulong gameID)
     {
-        var (data, _) = await GetAchievementsResponse(bot, gameID);
+        var (data, _) = await GetAchievementsResponse(bot, gameID).ConfigureAwait(false);
         return data;
     }
 

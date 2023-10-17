@@ -100,11 +100,11 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
         var flag = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
         var handler = typeof(ASFAchievementManagerEx).GetMethod(nameof(ResponseCommand), flag);
 
-        const string pluginName = nameof(ASFAchievementManagerEx);
+        const string pluginId = nameof(ASFAchievementManagerEx);
         const string cmdPrefix = "AAM";
         const string repoName = "ASFAchievementManagerEx";
 
-        ASFEBridge = AdapterBtidge.InitAdapter(pluginName, cmdPrefix, repoName, handler);
+        ASFEBridge = AdapterBtidge.InitAdapter(Name, pluginId, cmdPrefix, repoName, handler);
 
         if (ASFEBridge)
         {
@@ -129,6 +129,7 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
     /// </summary>
     /// <param name="bot"></param>
     /// <param name="access"></param>
+    /// <param name="cmd"></param>
     /// <param name="args"></param>
     /// <returns></returns>
     private static Task<string?>? ResponseCommand(Bot bot, EAccess access, string cmd, string[] args)
