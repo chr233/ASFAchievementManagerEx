@@ -20,10 +20,9 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
 
     private bool ASFEBridge;
 
-    [JsonProperty]
     public static PluginConfig Config => Utils.Config;
 
-    private static Timer? StatisticTimer;
+    private static Timer? StatisticTimer { get; set; }
 
     /// <summary>
     /// ASF启动事件
@@ -58,23 +57,23 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
 
         Utils.Config = config ?? new();
 
-        var sb = new StringBuilder();
+        var warnings = new StringBuilder();
 
         //使用协议
         if (!Config.EULA)
         {
-            sb.AppendLine();
-            sb.AppendLine(Langs.Line);
-            sb.AppendLineFormat(Langs.EulaWarning, nameof(ASFAchievementManagerEx));
-            sb.AppendLine(Langs.Line);
+            warnings.AppendLine();
+            warnings.AppendLine(Langs.Line);
+            warnings.AppendLineFormat(Langs.EulaWarning, Name);
+            warnings.AppendLine(Langs.Line);
         }
 
-        if (sb.Length > 0)
+        if (warnings.Length > 0)
         {
-            ASFLogger.LogGenericWarning(sb.ToString());
+            ASFLogger.LogGenericWarning(warnings.ToString());
         }
         //统计
-        if (Config.Statistic)
+        if (Config.Statistic && !ASFEBridge)
         {
             var request = new Uri("https://asfe.chrxw.com/asfachievemenevementmanagerex");
             StatisticTimer = new Timer(
