@@ -2,7 +2,6 @@ using ArchiSteamFarm.Core;
 using ArchiSteamFarm.Plugins.Interfaces;
 using ArchiSteamFarm.Steam;
 using ASFAchievementManagerEx.Core;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SteamKit2;
 using System.ComponentModel;
@@ -103,7 +102,7 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
         const string cmdPrefix = "AAM";
         const string repoName = "ASFAchievementManagerEx";
 
-        ASFEBridge = AdapterBtidge.InitAdapter(Name, pluginId, cmdPrefix, repoName, handler);
+        ASFEBridge = AdapterBridge.InitAdapter(Name, pluginId, cmdPrefix, repoName, handler);
 
         if (ASFEBridge)
         {

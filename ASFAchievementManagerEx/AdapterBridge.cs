@@ -1,7 +1,7 @@
 using System.Reflection;
 
 namespace ASFAchievementManagerEx;
-internal static class AdapterBtidge
+internal static class AdapterBridge
 {
     /// <summary>
     /// 注册子模块
