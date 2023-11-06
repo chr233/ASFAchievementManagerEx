@@ -1,6 +1,6 @@
 # ASFAchievementManagerEx
 
-> 基于 [Rudokhvist/ASF-Achievement-Manager](https://github.com/Rudokhvist/ASF-Achievement-Manager) 二次开发
+> Based on [Rudokhvist/ASF-Achievement-Manager](https://github.com/Rudokhvist/ASF-Achievement-Manager) secondary development
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/bb9315f60f9742dd94651c5d09fe1310)](https://www.codacy.com/gh/chr233/ASFAchievementManagerEx/dashboard)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/chr233/ASFAchievementManagerEx/publish.yml?logo=github)
@@ -19,52 +19,51 @@
 [![Steam](https://img.shields.io/badge/steam-donate-1B2838.svg?logo=steam)](https://steamcommunity.com/tradeoffer/new/?partner=221260487&token=xgqMgL-i)
 [![爱发电](https://img.shields.io/badge/爱发电-chr__-ea4aaa.svg?logo=github-sponsors)](https://afdian.net/@chr233)
 
-[English Version](README.en.md) | [Русская Версия](README.ru.md)
+[中文版本](README.md) | [Русская Версия](README.ru.md)
 
 ## EULA
 
-> 修改统计信息/成就具有一定风险, 修改有 VAC 保护的游戏的统计信息/成就可能会被封禁
+> Modifying statistics / achievements has risky, and modifying statistics / achievements of games protected by VAC may cause VAC banned
 >
-> 需要同意 EULA 方可使用本插件, 详见 [插件配置说明](#插件配置说明)
+> Consent to EULA is required to use this plug-in, see [Plugin Configuration](#plugin-configuration)
 
-## 安装方式
+## Installation
 
-### 初次安装 / 手动更新
+### First-Time Install / Manually Update
 
-1. 从 [GitHub Releases](https://github.com/chr233/ASFAchievementManagerEx/releases) 下载插件的最新版本
-2. 解压后将 `ASFAchievementManagerEx.dll` 丢进 `ArchiSteamFarm` 目录下的 `plugins` 文件夹
-3. 考虑到修改成就具有一定风险, 需要同意 `ASFEnhance.EULA` 后方可使用所有命令, 参考 [插件配置说明](#插件配置说明)
-4. 重新启动 `ArchiSteamFarm` , 使用命令 `AAM` 来检查插件是否正常工作
+1. Download the plugin via [GitHub Releases](https://github.com/chr233/ASFAchievementManagerEx/releases) page
+2. Unzip the `ASFAchievementManagerEx.dll` and copy it into the `plugins` folder in the `ArchiSteamFarm`'s directory
+3. Restart the `ArchiSteamFarm` and use `ASFAchievementManagerEx` or `AAM` command to check if the plugin is working
 
-### ASFEnhance 联动
+### ASFEnhance Integration
 
-> 推荐搭配 [ASFEnhance](https://github.com/chr233/ASFEnhance) 使用, 可以通过 ASFEnhance 实现插件更新管理和禁用特定命令等功能
+> It's recommended to install [ASFEnhance](https://github.com/chr233/ASFEnhance), it can provide plugin update service
 
-### 更新日志
+### Changelog
 
-| ASFAchievementManagerEx 版本                                                      | 适配 ASF 版本 | 更新说明        |
-| --------------------------------------------------------------------------------- | :-----------: | --------------- |
-| [1.0.2.0](https://github.com/chr233/ASFAchievementManagerEx/releases/tag/1.0.2.0) |   5.4.12.5    | ASF->5.4.12.5, 接入 ASFEnhance |
-| [1.0.1.2](https://github.com/chr233/ASFAchievementManagerEx/releases/tag/1.0.1.2) |   5.4.10.3    | 第一个版本      |
+| ASFAchievementManagerEx Version                                                   | Depended ASF | Description                           |
+| --------------------------------------------------------------------------------- | :----------: | ------------------------------------- |
+| [1.0.2.0](https://github.com/chr233/ASFAchievementManagerEx/releases/tag/1.0.2.0) |   5.4.12.5   | ASF->5.4.12.5, ASFEnhance Integration |
+| [1.0.1.2](https://github.com/chr233/ASFAchievementManagerEx/releases/tag/1.0.1.2) |   5.4.10.3   | First version                         |
 
 <details>
-  <summary>历史版本</summary>
+  <summary>History Version</summary>
 
 </details>
 
-## 插件配置说明
+## Plugin Configuration
 
-> 本插件的配置项名称已改为 ASFEnhance
+> Configuration key is change to ASFEnhance
 
 ASF.json
 
 ```json
 {
-  //ASF 配置
+  //ASF Configuration
   "CurrentCulture": "...",
   "IPCPassword": "...",
   "...": "...",
-  //ASFAchievementManagerEx 配置
+  //ASFAchievementManagerEx Configuration
   "ASFEnhance": {
     "EULA": true,
     "Statistic": true
@@ -72,32 +71,32 @@ ASF.json
 }
 ```
 
-| 配置项      | 类型 | 默认值  | 说明                                                                 |
-| ----------- | ---- | ------- | -------------------------------------------------------------------- |
-| `EULA`      | bool | `false` | 是否同意 [EULA](#eula), 当设置为 `true` 时, 视为同意 [EULA](#eula) |
-| `Statistic` | bool | `true`  | 是否允许发送统计数据, 仅用于统计插件用户数量, 不会发送任何其他信息   |
+| Configuration | Type   | Default | Description                                                                                              |
+| ------------- | ------ | ------- | -------------------------------------------------------------------------------------------------------- |
+| `EULA`        | `bool` | `true`  | If agree the [EULA](#eula), if set to `true`, deemed to agree [EULA]                                     |
+| `Statistic`   | `bool` | `true`  | Allow send statistics data, it's used to count number of users, this will not send any other information |
 
-## 插件指令说明
+## Commands Usage
 
-### 插件更新
+### Plugin Info
 
-| 命令                      | 缩写  | 权限            | 说明                                |
-| ------------------------- | ----- | --------------- | ----------------------------------- |
-| `ASFAchievementManagerEx` | `AAM` | `FamilySharing` | 查看 ASFAchievementManagerEx 的版本 |
+| Command                   | Shorthand | Access          | Description                                |
+| ------------------------- | --------- | --------------- | ------------------------------------------ |
+| `ASFAchievementManagerEx` | `AAM`     | `FamilySharing` | Get the version of ASFAchievementManagerEx |
 
-### 核心功能
+### Commands
 
-| 命令                                    | 缩写 | 权限       | 说明                                                             |
-| --------------------------------------- | ---- | ---------- | ---------------------------------------------------------------- |
-| `ALIST [Bots] <AppIds>`                 | -    | `Operator` | 获取指定机器人的成就列表                                         |
-| `ASTATS [Bots] <AppIds>`                | -    | `Operator` | 获取指定机器人的统计项列表                                       |
-| `AUNLOCK [Bots] AppId <AchievementIds>` | -    | `Master`   | 解锁指定游戏的成就, 部分成就只能由官方服务器设置, 客户端无法解锁 |
-| `ASET [Bots] AppId <AchievementIds>`    | -    | `Master`   | 同 `AUNLOCK` (原版插件的指令)                                    |
-| `ALOCK [Bots] AppId <AchievementIds>`   | -    | `Master`   | 锁住指定游戏的成就, 部分成就只能由官方服务器设置, 客户端无法解锁 |
-| `ARESET [Bots] AppId <AchievementIds>`  | -    | `Master`   | 同 `ALOCK` (原版插件的指令)                                      |
-| `AEDIT [Bots] AppId <KeyValues>`        | -    | `Master`   | 设置指定游戏的统计项, keyValue 语法为 Id=值, 具体参考 [使用示例](#使用示例)        |
+| Command                                 | Shorthand | Access     | Description                                                                                                |
+| --------------------------------------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
+| `ALIST [Bots] <AppIds>`                 | -         | `Operator` | Get the bot's achievements list                                                                            |
+| `ASTATS [Bots] <AppIds>`                | -         | `Operator` | Get the bot's statistics list                                                                              |
+| `AUNLOCK [Bots] AppId <AchievementIds>` | -         | `Master`   | Unlock the bot's achievements, can't modify the protected achievements                                     |
+| `ASET [Bots] AppId <AchievementIds>`    | -         | `Master`   | Same as `AUNLOCK` (Origin plugin's command)                                                                |
+| `ALOCK [Bots] AppId <AchievementIds>`   | -         | `Master`   | Lock the bot's achievements, can't modify the protected achievements                                       |
+| `ARESET [Bots] AppId <AchievementIds>`  | -         | `Master`   | Same as `ALOCK` (Origin plugin's command)                                                                  |
+| `AEDIT [Bots] AppId <KeyValues>`        | -         | `Master`   | Edit the bot's Statistics value, the syntax of keyValue is `Id=Value`, see [Usage Example](#usage-example) |
 
-### 使用示例
+### Usage Example
 
 - ALIST 获取成就列表
 
