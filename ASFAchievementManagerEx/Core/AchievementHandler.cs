@@ -21,18 +21,25 @@ internal sealed class AchievementHandler : ClientMsgHandler
             return;
         }
 
-        switch (packetMsg.MsgType)
+        try
         {
-            case EMsg.ClientGetUserStatsResponse:
-                var getAchievementsResponse = new ClientMsgProtobuf<CMsgClientGetUserStatsResponse>(packetMsg);
-                Client.PostCallback(new GetAchievementsCallback(packetMsg.TargetJobID, getAchievementsResponse.Body));
-                break;
+            switch (packetMsg.MsgType)
+            {
+                case EMsg.ClientGetUserStatsResponse:
+                    var getAchievementsResponse = new ClientMsgProtobuf<CMsgClientGetUserStatsResponse>(packetMsg);
+                    Client.PostCallback(new GetAchievementsCallback(packetMsg.TargetJobID, getAchievementsResponse.Body));
+                    break;
 
-            case EMsg.ClientStoreUserStatsResponse:
-                var setAchievementsResponse = new ClientMsgProtobuf<CMsgClientStoreUserStatsResponse>(packetMsg);
-                Client.PostCallback(new SetAchievementsCallback(packetMsg.TargetJobID, setAchievementsResponse.Body));
-                break;
+                case EMsg.ClientStoreUserStatsResponse:
+                    var setAchievementsResponse = new ClientMsgProtobuf<CMsgClientStoreUserStatsResponse>(packetMsg);
+                    Client.PostCallback(new SetAchievementsCallback(packetMsg.TargetJobID, setAchievementsResponse.Body));
+                    break;
+            }
+        }catch(Exception ex)
+        {
+            ASFLogger.LogGenericException(ex);
         }
+
     }
 
     /// <summary>

@@ -172,7 +172,7 @@
     <value>{0}({1})</value>
   </data>
   <data name="StatsTitle" xml:space="preserve">
-    <value>  Id  [Min Current Max] Name 🔒Protected🔼IncreaseOnly⚠️MaxChange</value>
+    <value>  Id  [Min Current Max] Name 🔒Protected🔼IncrementOnly⚠️MaxChange</value>
   </data>
   <data name="InternalError" xml:space="preserve">
     <value>Internal Error</value>
@@ -190,28 +190,28 @@
     <value>Execute result:</value>
   </data>
   <data name="AchievementChangeUnnecessary" xml:space="preserve">
-    <value>{0}-{1}: 无需修改该项成就</value>
+    <value>{0}-{1}: No need to modify this achievement</value>
   </data>
   <data name="AchievementIsProtected" xml:space="preserve">
-    <value>{0}-{1}: 无法修改被保护的成就</value>
+    <value>{0}-{1}: Can not modify the protected achievement</value>
   </data>
   <data name="AchievementIdInvalid" xml:space="preserve">
-    <value>{0}: 无效参数, 需要为整数</value>
+    <value>{0}: Invalid argument, must be an integer</value>
   </data>
   <data name="AchievementList" xml:space="preserve">
-    <value>App/{0} 的成就列表:</value>
+    <value>App/{0} ‘s archievements list:</value>
   </data>
   <data name="AchievementNotFounf" xml:space="preserve">
-    <value>{0}: 找不到此ID的成就</value>
+    <value>{0}: Achievement Id not found</value>
   </data>
   <data name="AchievementItem" xml:space="preserve">
     <value>- {0,-3} {1} {2}{3}</value>
   </data>
   <data name="NoAchievementEffected" xml:space="preserve">
-    <value>无待设置的成就</value>
+    <value>There are no achievements to be edit</value>
   </data>
   <data name="NoStatsEffected" xml:space="preserve">
-    <value>无待设置的统计项</value>
+    <value>There are no statistics to be edit</value>
   </data>
   <data name="WarningInfo" xml:space="preserve">
     <value>Warning info:</value>
@@ -220,43 +220,43 @@
     <value>- {0,-3} [{1}] {2}{3}{4}{5}</value>
   </data>
   <data name="StatsIsProtected" xml:space="preserve">
-    <value>{0}-{1} [{2}]: 无法修改被保护的统计项</value>
+    <value>{0}-{1} [{2}]: Can not modify the protected statistic</value>
   </data>
   <data name="StatsIncrementOnlyLimited" xml:space="preserve">
-    <value>{0}-{1} [{2}]: 具有递增限制的统计项无法设置为更低的值 {3}</value>
+    <value>{0}-{1} [{2}]: Statistic with IncrementOnly flag can not set to a lower value {3}</value>
   </data>
   <data name="StatsTargetValueInvalid" xml:space="preserve">
-    <value>{0}-{1} [{2}]: 无法设置为{3}, 参数需要为整数</value>
+    <value>{0}-{1} [{2}]: Can not set to {3}, argument must be integer</value>
   </data>
   <data name="StatsMaxChangeLimited" xml:space="preserve">
-    <value>{0}-{1} [{2}]: 设定的值 {3} 超过了最大该变量 {4}, 修改为允许的上/下限</value>
+    <value>{0}-{1} [{2}]: Set value {3} is exceed the maximum variable range {4}, change to allowable upper / lower limit</value>
   </data>
   <data name="StatsList" xml:space="preserve">
-    <value>App/{0} 的统计数据列表:</value>
+    <value>App/{0} ‘s statistic list:</value>
   </data>
   <data name="StatsNotFound" xml:space="preserve">
-    <value>{0}: 找不到此统计项ID</value>
+    <value>{0}: Statistics Id not found</value>
   </data>
   <data name="StatsCantSetToMax" xml:space="preserve">
-    <value>{0}-{1} [{2}]: 无法设置为最大值, 最大值为Null</value>
+    <value>{0}-{1} [{2}]: Can not set to Max, Max value is null</value>
   </data>
   <data name="StatsCantSetToDefault" xml:space="preserve">
-    <value>{0}-{1} [{2}]: 无法设置为默认值, 默认值为Null</value>
+    <value>{0}-{1} [{2}]: Can not set to Default, Default value is null</value>
   </data>
   <data name="StatsArgumentInvalid" xml:space="preserve">
-    <value>{0}: 无效参数, 格式为n=x, n为整数, x为整数或d/default(默认值)或i/min(最小值)或a/max(最大值)</value>
+    <value>{0}: Invalid argument, require format "n=x", "n" is integer, "x" is integer or "d"/"default" (Default value) or "i"/"min" (Min value) or "a"/"max" (Max value)</value>
   </data>
   <data name="StatsCantSetToMin" xml:space="preserve">
-    <value>{0}-{1} [{2}]: 无法设置为最小值, 最小值为Null</value>
+    <value>{0}-{1} [{2}]: Can not set to Min, Min value is null</value>
   </data>
   <data name="StatsChangeUnnecessary" xml:space="preserve">
-    <value>{0}-{1} [{2}]: 无需更改的统计项</value>
+    <value>{0}-{1} [{2}]: No need to modify this statistic</value>
   </data>
   <data name="SetStatsResult" xml:space="preserve">
-    <value>设置统计项{0}, 受影响统计项 {1} 个</value>
+    <value>Set statistic(s) {0}, affected  {1} statistic(s)</value>
   </data>
   <data name="SetAchievementResult" xml:space="preserve">
-    <value>设置成就{0}, 受影响成就 {1} 个</value>
+    <value>Set achievement(s) {0}, affected  {1} achievement(s)</value>
   </data>
   <data name="PluginStandalongMode" xml:space="preserve">
     <value>推荐安装 ASFEnhance, 支持自动更新插件</value>
@@ -265,10 +265,10 @@
     <value>==========================================</value>
   </data>
   <data name="ASFEnhanceRegisterFailed" xml:space="preserve">
-    <value>ASFEBridge 注册失败</value>
+    <value>ASFEBridge registration failed</value>
   </data>
   <data name="ASFEnhanceRegisterSuccess" xml:space="preserve">
-    <value>ASFEBridge 注册成功</value>
+    <value>ASFEBridge registered successfully</value>
   </data>
   <data name="EmojiNo" xml:space="preserve">
     <value>❌</value>
@@ -284,5 +284,8 @@
   </data>
   <data name="EmojiIncrementOnly" xml:space="preserve">
     <value>🔼</value>
+  </data>
+  <data name="GetAchievementDataError" xml:space="preserve">
+    <value>Get App/{0} 's achievement error, please try again later</value>
   </data>
 </root>

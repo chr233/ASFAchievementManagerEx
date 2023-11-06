@@ -247,7 +247,7 @@
     <value>{0}-{1} [{2}]: 具有递增限制的统计项无法设置为更低的值 {3}</value>
   </data>
   <data name="StatsMaxChangeLimited" xml:space="preserve">
-    <value>{0}-{1} [{2}]: 设定的值 {3} 超过了最大该变量 {4}, 修改为允许的上/下限</value>
+    <value>{0}-{1} [{2}]: 设定的值 {3} 超过了最大改变量 {4}, 修改为允许的上/下限</value>
   </data>
   <data name="StatsNotFound" xml:space="preserve">
     <value>{0}: 找不到此统计项ID</value>
@@ -284,5 +284,8 @@
   </data>
   <data name="EmojiIncrementOnly" xml:space="preserve">
     <value>🔼</value>
+  </data>
+  <data name="GetAchievementDataError" xml:space="preserve">
+    <value>获取 App/{0} 的成就数据出错, 请稍后重试</value>
   </data>
 </root>

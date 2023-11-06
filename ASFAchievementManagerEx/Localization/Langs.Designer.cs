@@ -268,6 +268,15 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
+        ///   查找类似 获取 App/{0} 的成就数据出错, 请稍后重试 的本地化字符串。
+        /// </summary>
+        internal static string GetAchievementDataError {
+            get {
+                return ResourceManager.GetString("GetAchievementDataError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 获取 App/{0} 的成就数据失败 的本地化字符串。
         /// </summary>
         internal static string GetAchievementDataFailure {
@@ -502,7 +511,7 @@ namespace ASFAchievementManagerEx.Localization {
         }
         
         /// <summary>
-        ///   查找类似 {0}-{1} [{2}]: 设定的值 {3} 超过了最大该变量 {4}, 修改为允许的上/下限 的本地化字符串。
+        ///   查找类似 {0}-{1} [{2}]: 设定的值 {3} 超过了最大改变量 {4}, 修改为允许的上/下限 的本地化字符串。
         /// </summary>
         internal static string StatsMaxChangeLimited {
             get {

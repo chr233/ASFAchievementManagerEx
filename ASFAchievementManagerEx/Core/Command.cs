@@ -35,28 +35,36 @@ internal static class Command
             }
             else
             {
-                var userStats = await handler.GetUserStats(bot, gameId).ConfigureAwait(false);
-                var achievements = userStats?.Achievements;
-
-                if (achievements?.Count > 0)
+                try
                 {
-                    sb.AppendLine(bot.FormatBotResponse(Langs.AchievementList, entry));
+                    var userStats = await handler.GetUserStats(bot, gameId).ConfigureAwait(false);
+                    var achievements = userStats?.Achievements;
 
-                    var id = 1;
-                    foreach (var achievement in achievements)
+                    if (achievements?.Count > 0)
                     {
-                        sb.AppendLineFormat(
-                            Langs.AchievementItem,
-                            id++,
-                            achievement.IsUnlock ? Langs.EmojiYes : Langs.EmojiNo,
-                            achievement.Name,
-                            achievement.IsProtected ? Langs.EmojiLock : ""
-                        );
+                        sb.AppendLine(bot.FormatBotResponse(Langs.AchievementList, entry));
+
+                        var id = 1;
+                        foreach (var achievement in achievements)
+                        {
+                            sb.AppendLineFormat(
+                                Langs.AchievementItem,
+                                id++,
+                                achievement.IsUnlock ? Langs.EmojiYes : Langs.EmojiNo,
+                                achievement.Name,
+                                achievement.IsProtected ? Langs.EmojiLock : ""
+                            );
+                        }
+                    }
+                    else
+                    {
+                        sb.AppendLine(bot.FormatBotResponse(bot.IsConnectedAndLoggedOn ? string.Format(Langs.GetAchievementDataFailure, entry) : Strings.BotNotConnected));
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    sb.AppendLine(bot.FormatBotResponse(bot.IsConnectedAndLoggedOn ? string.Format(Langs.GetAchievementDataFailure, entry) : Strings.BotNotConnected));
+                    ASFLogger.LogGenericException(ex);
+                    sb.AppendLine(bot.FormatBotResponse(Langs.GetAchievementDataError, entry));
                 }
             }
 
@@ -117,30 +125,38 @@ internal static class Command
             }
             else
             {
-                var userStats = await handler.GetUserStats(bot, gameId).ConfigureAwait(false);
-                var statsDict = userStats?.Stats;
-
-                if (statsDict?.Count > 0)
+                try
                 {
-                    sb.AppendLine(bot.FormatBotResponse(Langs.StatsList, entry));
-                    sb.AppendLine(Langs.StatsTitle);
+                    var userStats = await handler.GetUserStats(bot, gameId).ConfigureAwait(false);
+                    var statsDict = userStats?.Stats;
 
-                    foreach (var (id, stats) in statsDict)
+                    if (statsDict?.Count > 0)
                     {
-                        sb.AppendLineFormat(
-                            Langs.StatsItem,
-                            id,
-                            stats.StrValue,
-                            stats.Name,
-                            stats.IsProtected ? Langs.EmojiLock : "",
-                            stats.IsIncrementOnly ? Langs.EmojiIncrementOnly : "",
-                            stats.MaxChange != null ? string.Format(Langs.MaxChange, Langs.EmojiWarning, stats.MaxChange) : ""
-                        );
+                        sb.AppendLine(bot.FormatBotResponse(Langs.StatsList, entry));
+                        sb.AppendLine(Langs.StatsTitle);
+
+                        foreach (var (id, stats) in statsDict)
+                        {
+                            sb.AppendLineFormat(
+                                Langs.StatsItem,
+                                id,
+                                stats.StrValue,
+                                stats.Name,
+                                stats.IsProtected ? Langs.EmojiLock : "",
+                                stats.IsIncrementOnly ? Langs.EmojiIncrementOnly : "",
+                                stats.MaxChange != null ? string.Format(Langs.MaxChange, Langs.EmojiWarning, stats.MaxChange) : ""
+                            );
+                        }
+                    }
+                    else
+                    {
+                        sb.AppendLine(bot.FormatBotResponse(bot.IsConnectedAndLoggedOn ? string.Format(Langs.GetAchievementDataFailure, entry) : Strings.BotNotConnected));
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    sb.AppendLine(bot.FormatBotResponse(bot.IsConnectedAndLoggedOn ? string.Format(Langs.GetAchievementDataFailure, entry) : Strings.BotNotConnected));
+                    sb.AppendLine(bot.FormatBotResponse(Langs.GetAchievementDataError, entry));
+                    sb.AppendLine(e.ToString());
                 }
             }
 
@@ -202,84 +218,92 @@ internal static class Command
             return bot.FormatBotResponse(Langs.ArgsInvalid, nameof(appId), appId);
         }
 
-        var (userStats, crc_status) = await handler.GetUserStatsWithCrcStats(bot, gameId).ConfigureAwait(false);
-        var achievementList = userStats?.Achievements;
-
-        if (achievementList == null)
+        try
         {
-            return bot.FormatBotResponse(Langs.GetAchievementDataFailure, appId);
-        }
+            var (userStats, crc_status) = await handler.GetUserStatsWithCrcStats(bot, gameId).ConfigureAwait(false);
+            var achievementList = userStats?.Achievements;
 
-        var effectedAchievements = new HashSet<AchievementData>();
-
-        var warnings = new StringBuilder();
-
-        if (query != "*")
-        {
-            var entries = query.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            foreach (var entry in entries)
+            if (achievementList == null)
             {
-                if (int.TryParse(entry, out var index))
-                {
-                    if (achievementList.Count < index || index <= 0)
-                    {
-                        warnings.AppendLineFormat(Langs.AchievementNotFounf, index);
-                    }
-                    else
-                    {
-                        var achievement = achievementList[index - 1];
+                return bot.FormatBotResponse(Langs.GetAchievementDataFailure, appId);
+            }
 
-                        if (achievement.IsUnlock == unlock)
+            var effectedAchievements = new HashSet<AchievementData>();
+
+            var warnings = new StringBuilder();
+
+            if (query != "*")
+            {
+                var entries = query.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var entry in entries)
+                {
+                    if (int.TryParse(entry, out var index))
+                    {
+                        if (achievementList.Count < index || index <= 0)
                         {
-                            warnings.AppendLineFormat(Langs.AchievementChangeUnnecessary, index, achievement.Name);
-                        }
-                        else if (achievement.IsProtected)
-                        {
-                            warnings.AppendLineFormat(Langs.AchievementIsProtected, index, achievement.Name);
+                            warnings.AppendLineFormat(Langs.AchievementNotFounf, index);
                         }
                         else
                         {
-                            effectedAchievements.Add(achievement);
+                            var achievement = achievementList[index - 1];
+
+                            if (achievement.IsUnlock == unlock)
+                            {
+                                warnings.AppendLineFormat(Langs.AchievementChangeUnnecessary, index, achievement.Name);
+                            }
+                            else if (achievement.IsProtected)
+                            {
+                                warnings.AppendLineFormat(Langs.AchievementIsProtected, index, achievement.Name);
+                            }
+                            else
+                            {
+                                effectedAchievements.Add(achievement);
+                            }
                         }
                     }
-                }
-                else
-                {
-                    warnings.AppendLineFormat(Langs.AchievementIdInvalid, entry);
+                    else
+                    {
+                        warnings.AppendLineFormat(Langs.AchievementIdInvalid, entry);
+                    }
                 }
             }
-        }
-        else
-        {
-            foreach (var achievement in achievementList)
+            else
             {
-                if (!achievement.IsProtected && achievement.IsUnlock != unlock)
+                foreach (var achievement in achievementList)
                 {
-                    effectedAchievements.Add(achievement);
+                    if (!achievement.IsProtected && achievement.IsUnlock != unlock)
+                    {
+                        effectedAchievements.Add(achievement);
+                    }
                 }
             }
-        }
 
-        var sb = new StringBuilder();
-        if (warnings.Length > 0)
-        {
-            sb.AppendLine(Langs.MultipleLineResult);
-            sb.AppendLine(Langs.WarningInfo);
-            sb.AppendLine(warnings.ToString());
-            sb.AppendLine(Langs.ExecuteResult);
-        }
+            var sb = new StringBuilder();
+            if (warnings.Length > 0)
+            {
+                sb.AppendLine(Langs.MultipleLineResult);
+                sb.AppendLine(Langs.WarningInfo);
+                sb.AppendLine(warnings.ToString());
+                sb.AppendLine(Langs.ExecuteResult);
+            }
 
-        if (effectedAchievements.Any())
-        {
-            var result = await handler.ModifyAchievements(bot, gameId, crc_status, effectedAchievements, unlock).ConfigureAwait(false);
-            sb.AppendLineFormat(Langs.SetAchievementResult, result == true ? Langs.Success : Langs.Failure, effectedAchievements.Count);
-        }
-        else
-        {
-            sb.AppendLine(Langs.NoAchievementEffected);
-        }
+            if (effectedAchievements.Any())
+            {
+                var result = await handler.ModifyAchievements(bot, gameId, crc_status, effectedAchievements, unlock).ConfigureAwait(false);
+                sb.AppendLineFormat(Langs.SetAchievementResult, result == true ? Langs.Success : Langs.Failure, effectedAchievements.Count);
+            }
+            else
+            {
+                sb.AppendLine(Langs.NoAchievementEffected);
+            }
 
-        return bot.FormatBotResponse(sb.ToString());
+            return bot.FormatBotResponse(sb.ToString());
+        }
+        catch (Exception ex)
+        {
+            ASFLogger.LogGenericException(ex);
+            return bot.FormatBotResponse(Langs.GetAchievementDataError, appId);
+        }
     }
 
     /// <summary>
@@ -336,128 +360,136 @@ internal static class Command
             return bot.FormatBotResponse(Langs.ArgsInvalid, nameof(appId), appId);
         }
 
-        var (userStats, crc_status) = await handler.GetUserStatsWithCrcStats(bot, gameId).ConfigureAwait(false);
-        var statsDict = userStats?.Stats;
-
-        if (statsDict == null)
+        try
         {
-            return bot.FormatBotResponse(Langs.GetAchievementDataFailure, appId);
-        }
+            var (userStats, crc_status) = await handler.GetUserStatsWithCrcStats(bot, gameId).ConfigureAwait(false);
+            var statsDict = userStats?.Stats;
 
-        var effectedAchievements = new HashSet<StatsData>();
-
-        var warnings = new StringBuilder();
-
-
-        var entries = query.Split(',', StringSplitOptions.RemoveEmptyEntries);
-        foreach (var entry in entries)
-        {
-            var args = entry.Split('=', StringSplitOptions.RemoveEmptyEntries);
-            if (args.Length < 2)
+            if (statsDict == null)
             {
-                warnings.AppendLineFormat(Langs.StatsArgumentInvalid, entry);
-                continue;
+                return bot.FormatBotResponse(Langs.GetAchievementDataFailure, appId);
             }
 
-            if (uint.TryParse(args[0], out var index))
+            var effectedAchievements = new HashSet<StatsData>();
+
+            var warnings = new StringBuilder();
+
+
+            var entries = query.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var entry in entries)
             {
-                if (statsDict.TryGetValue(index, out var stat))
+                var args = entry.Split('=', StringSplitOptions.RemoveEmptyEntries);
+                if (args.Length < 2)
                 {
-                    if (stat.IsProtected)
+                    warnings.AppendLineFormat(Langs.StatsArgumentInvalid, entry);
+                    continue;
+                }
+
+                if (uint.TryParse(args[0], out var index))
+                {
+                    if (statsDict.TryGetValue(index, out var stat))
                     {
-                        warnings.AppendLineFormat(Langs.StatsIsProtected, index, stat.Name, stat.StrValue);
+                        if (stat.IsProtected)
+                        {
+                            warnings.AppendLineFormat(Langs.StatsIsProtected, index, stat.Name, stat.StrValue);
+                        }
+
+                        uint? targetValue = null;
+                        switch (args[1].ToLowerInvariant())
+                        {
+                            case "d":
+                            case "default":
+                                if (stat.Default == null)
+                                {
+                                    warnings.AppendLineFormat(Langs.StatsCantSetToDefault, stat.Id, stat.Name, stat.StrValue);
+                                }
+                                targetValue = stat.Default;
+                                break;
+                            case "i":
+                            case "min":
+                                if (stat.Min == null)
+                                {
+                                    warnings.AppendLineFormat(Langs.StatsCantSetToMin, stat.Id, stat.Name, stat.StrValue);
+                                }
+                                targetValue = stat.Min;
+                                break;
+                            case "a":
+                            case "max":
+                                if (stat.Max == null)
+                                {
+                                    warnings.AppendLineFormat(Langs.StatsCantSetToMax, stat.Id, stat.Name, stat.StrValue);
+                                }
+                                targetValue = stat.Max;
+                                break;
+                            default:
+                                if (uint.TryParse(args[1], out var value))
+                                {
+                                    targetValue = value;
+                                }
+                                else
+                                {
+                                    warnings.AppendLineFormat(Langs.StatsTargetValueInvalid, stat.Id, stat.Name, stat.StrValue, args[1]);
+                                }
+                                break;
+                        }
+
+                        if (targetValue != null)
+                        {
+                            if (stat.Value == targetValue)
+                            {
+                                warnings.AppendLineFormat(Langs.StatsChangeUnnecessary, index, stat.Name, stat.StrValue);
+                            }
+                            else if (stat.IsIncrementOnly && stat.Value > targetValue)
+                            {
+                                warnings.AppendLineFormat(Langs.StatsIncrementOnlyLimited, index, stat.Name, stat.StrValue, targetValue);
+                            }
+                            else if (stat.MaxChange != null && Math.Abs((decimal)stat.Value - targetValue.Value) > stat.MaxChange)
+                            {
+                                warnings.AppendLineFormat(Langs.StatsMaxChangeLimited, index, stat.Name, stat.StrValue, targetValue, stat.MaxChange);
+                                targetValue = stat.Value > targetValue ? stat.Value + stat.MaxChange : stat.Value - stat.MaxChange;
+                            }
+
+                            stat.Value = targetValue.Value;
+                            effectedAchievements.Add(stat);
+                        }
                     }
-
-                    uint? targetValue = null;
-                    switch (args[1].ToLowerInvariant())
+                    else
                     {
-                        case "d":
-                        case "default":
-                            if (stat.Default == null)
-                            {
-                                warnings.AppendLineFormat(Langs.StatsCantSetToDefault, stat.Id, stat.Name, stat.StrValue);
-                            }
-                            targetValue = stat.Default;
-                            break;
-                        case "i":
-                        case "min":
-                            if (stat.Min == null)
-                            {
-                                warnings.AppendLineFormat(Langs.StatsCantSetToMin, stat.Id, stat.Name, stat.StrValue);
-                            }
-                            targetValue = stat.Min;
-                            break;
-                        case "a":
-                        case "max":
-                            if (stat.Max == null)
-                            {
-                                warnings.AppendLineFormat(Langs.StatsCantSetToMax, stat.Id, stat.Name, stat.StrValue);
-                            }
-                            targetValue = stat.Max;
-                            break;
-                        default:
-                            if (uint.TryParse(args[1], out var value))
-                            {
-                                targetValue = value;
-                            }
-                            else
-                            {
-                                warnings.AppendLineFormat(Langs.StatsTargetValueInvalid, stat.Id, stat.Name, stat.StrValue, args[1]);
-                            }
-                            break;
-                    }
-
-                    if (targetValue != null)
-                    {
-                        if (stat.Value == targetValue)
-                        {
-                            warnings.AppendLineFormat(Langs.StatsChangeUnnecessary, index, stat.Name, stat.StrValue);
-                        }
-                        else if (stat.IsIncrementOnly && stat.Value > targetValue)
-                        {
-                            warnings.AppendLineFormat(Langs.StatsIncrementOnlyLimited, index, stat.Name, stat.StrValue, targetValue);
-                        }
-                        else if (stat.MaxChange != null && Math.Abs((decimal)stat.Value - targetValue.Value) > stat.MaxChange)
-                        {
-                            warnings.AppendLineFormat(Langs.StatsMaxChangeLimited, index, stat.Name, stat.StrValue, targetValue, stat.MaxChange);
-                            targetValue = stat.Value > targetValue ? stat.Value + stat.MaxChange : stat.Value - stat.MaxChange;
-                        }
-
-                        stat.Value = targetValue.Value;
-                        effectedAchievements.Add(stat);
+                        warnings.AppendLineFormat(Langs.StatsNotFound, index);
                     }
                 }
                 else
                 {
-                    warnings.AppendLineFormat(Langs.StatsNotFound, index);
+                    warnings.AppendLineFormat(Langs.StatsArgumentInvalid, entry);
                 }
+            }
+
+            var sb = new StringBuilder();
+            if (warnings.Length > 0)
+            {
+                sb.AppendLine(Langs.MultipleLineResult);
+                sb.AppendLine(Langs.WarningInfo);
+                sb.AppendLine(warnings.ToString());
+                sb.AppendLine(Langs.ExecuteResult);
+            }
+
+            if (effectedAchievements.Any())
+            {
+                var result = await handler.ModifyStats(bot, gameId, crc_status, effectedAchievements).ConfigureAwait(false);
+                sb.AppendLineFormat(Langs.SetStatsResult, result == true ? Langs.Success : Langs.Failure, effectedAchievements.Count);
             }
             else
             {
-                warnings.AppendLineFormat(Langs.StatsArgumentInvalid, entry);
+                sb.AppendLine(Langs.NoStatsEffected);
             }
-        }
 
-        var sb = new StringBuilder();
-        if (warnings.Length > 0)
-        {
-            sb.AppendLine(Langs.MultipleLineResult);
-            sb.AppendLine(Langs.WarningInfo);
-            sb.AppendLine(warnings.ToString());
-            sb.AppendLine(Langs.ExecuteResult);
+            return bot.FormatBotResponse(sb.ToString());
         }
-
-        if (effectedAchievements.Any())
+        catch (Exception ex)
         {
-            var result = await handler.ModifyStats(bot, gameId, crc_status, effectedAchievements).ConfigureAwait(false);
-            sb.AppendLineFormat(Langs.SetStatsResult, result == true ? Langs.Success : Langs.Failure, effectedAchievements.Count);
+            ASFLogger.LogGenericException(ex);
+            return bot.FormatBotResponse(Langs.GetAchievementDataError, appId);
         }
-        else
-        {
-            sb.AppendLine(Langs.NoStatsEffected);
-        }
-
-        return bot.FormatBotResponse(sb.ToString());
     }
 
     /// <summary>
