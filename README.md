@@ -29,6 +29,8 @@
 
 ## 安装方式
 
+> WIP
+
 ### 初次安装 / 手动更新
 
 1. 从 [GitHub Releases](https://github.com/chr233/ASFAchievementManagerEx/releases) 下载插件的最新版本
