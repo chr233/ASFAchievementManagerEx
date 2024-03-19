@@ -22,7 +22,7 @@ internal static class AdapterBridge
 
             if (registerModule != null && adapterEndpoint != null)
             {
-                var result = registerModule?.Invoke(null, new object?[] { pluginName, pluginIdentity, cmdPrefix, repoName, pluinVersion, cmdHandler });
+                var result = registerModule?.Invoke(null, [pluginName, pluginIdentity, cmdPrefix, repoName, pluinVersion, cmdHandler]);
 
                 if (result is string str)
                 {

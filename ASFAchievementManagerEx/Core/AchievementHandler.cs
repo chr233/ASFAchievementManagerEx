@@ -35,7 +35,8 @@ internal sealed class AchievementHandler : ClientMsgHandler
                     Client.PostCallback(new SetAchievementsCallback(packetMsg.TargetJobID, setAchievementsResponse.Body));
                     break;
             }
-        }catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             ASFLogger.LogGenericException(ex);
         }
@@ -238,7 +239,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
     /// </summary>
     /// <param name="achievements"></param>
     /// <param name="unlock"></param>
-    private static IDictionary<uint, CMsgClientStoreUserStats2.Stats> GetEffectAchievementDict(HashSet<AchievementData> achievements, bool unlock)
+    private static Dictionary<uint, CMsgClientStoreUserStats2.Stats> GetEffectAchievementDict(HashSet<AchievementData> achievements, bool unlock)
     {
         var effectedStatsDict = new Dictionary<uint, CMsgClientStoreUserStats2.Stats>();
 
@@ -284,9 +285,8 @@ internal sealed class AchievementHandler : ClientMsgHandler
     /// 添加修改的统计项
     /// </summary>
     /// <param name="statsList"></param>
-    /// <param name="unlock"></param>
     /// <returns></returns>
-    private static IList<CMsgClientStoreUserStats2.Stats> GetEffectStatsList(HashSet<StatsData> statsList)
+    private static List<CMsgClientStoreUserStats2.Stats> GetEffectStatsList(HashSet<StatsData> statsList)
     {
         var effectedStatsDict = new List<CMsgClientStoreUserStats2.Stats>();
         foreach (var stats in statsList)
@@ -314,7 +314,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
     {
         var effectedStatsDict = GetEffectAchievementDict(achievements, unlock);
 
-        if (effectedStatsDict.Any())
+        if (effectedStatsDict.Count != 0)
         {
             var request = new ClientMsgProtobuf<CMsgClientStoreUserStats2>(EMsg.ClientStoreUserStats2)
             {
@@ -351,7 +351,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
     {
         var effectedStatsList = GetEffectStatsList(stats);
 
-        if (effectedStatsList.Any())
+        if (effectedStatsList.Count != 0)
         {
             var request = new ClientMsgProtobuf<CMsgClientStoreUserStats2>(EMsg.ClientStoreUserStats2)
             {

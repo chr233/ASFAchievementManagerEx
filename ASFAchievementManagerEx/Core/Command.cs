@@ -287,7 +287,7 @@ internal static class Command
                 sb.AppendLine(Langs.ExecuteResult);
             }
 
-            if (effectedAchievements.Any())
+            if (effectedAchievements.Count != 0)
             {
                 var result = await handler.ModifyAchievements(bot, gameId, crc_status, effectedAchievements, unlock).ConfigureAwait(false);
                 sb.AppendLineFormat(Langs.SetAchievementResult, result == true ? Langs.Success : Langs.Failure, effectedAchievements.Count);
@@ -473,7 +473,7 @@ internal static class Command
                 sb.AppendLine(Langs.ExecuteResult);
             }
 
-            if (effectedAchievements.Any())
+            if (effectedAchievements.Count != 0)
             {
                 var result = await handler.ModifyStats(bot, gameId, crc_status, effectedAchievements).ConfigureAwait(false);
                 sb.AppendLineFormat(Langs.SetStatsResult, result == true ? Langs.Success : Langs.Failure, effectedAchievements.Count);
