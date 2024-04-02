@@ -443,10 +443,14 @@ internal static class Command
                             {
                                 warnings.AppendLineFormat(Langs.StatsIncrementOnlyLimited, index, stat.Name, stat.StrValue, targetValue);
                             }
-                            else if (stat.MaxChange != null && Math.Abs((decimal)stat.Value - targetValue.Value) > stat.MaxChange)
+                            else if (stat.MaxChange != null)
                             {
-                                warnings.AppendLineFormat(Langs.StatsMaxChangeLimited, index, stat.Name, stat.StrValue, targetValue, stat.MaxChange);
-                                targetValue = stat.Value > targetValue ? stat.Value + stat.MaxChange : stat.Value - stat.MaxChange;
+                                var changeValue = stat.Value > targetValue ? stat.Value - targetValue : targetValue - stat.Value;
+                                if (changeValue > stat.MaxChange)
+                                {
+                                    warnings.AppendLineFormat(Langs.StatsMaxChangeLimited, index, stat.Name, stat.StrValue, targetValue, stat.MaxChange);
+                                    targetValue = stat.Value > targetValue ? stat.Value + stat.MaxChange : stat.Value - stat.MaxChange;
+                                }
                             }
 
                             stat.Value = targetValue.Value;
@@ -514,7 +518,6 @@ internal static class Command
         }
 
         var results = await Utilities.InParallel(bots.Select(bot => ResponseSetStats(bot, appId, query))).ConfigureAwait(false);
-
         var responses = new List<string?>(results.Where(result => !string.IsNullOrEmpty(result)));
 
         return responses.Count > 0 ? string.Join(Environment.NewLine, responses) : null;
