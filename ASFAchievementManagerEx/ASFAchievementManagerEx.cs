@@ -1,4 +1,5 @@
 using ArchiSteamFarm.Core;
+using ArchiSteamFarm.Helpers.Json;
 using ArchiSteamFarm.Plugins.Interfaces;
 using ArchiSteamFarm.Steam;
 using ASFAchievementManagerEx.Core;
@@ -40,7 +41,7 @@ internal sealed class ASFAchievementManagerEx : IASF, IBotSteamClient, IBotComma
                 {
                     try
                     {
-                        config = configValue.Deserialize<PluginConfig>();
+                        config = configValue.ToJsonObject<PluginConfig>();
                         if (config != null)
                         {
                             break;
