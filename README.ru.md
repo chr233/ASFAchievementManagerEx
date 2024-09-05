@@ -39,18 +39,6 @@
 
 > It's recommended to install [ASFEnhance](https://github.com/chr233/ASFEnhance), it can provide plugin update service
 
-### Журнал изменений
-
-| Версия ASFAchievementManagerEx                                                    | Зависит от ASF | Описание                              |
-| --------------------------------------------------------------------------------- | :------------: | ------------------------------------- |
-| [1.0.2.0](https://github.com/chr233/ASFAchievementManagerEx/releases/tag/1.0.2.0) |    5.4.12.5    | ASF->5.4.12.5, ASFEnhance Integration |
-| [1.0.1.2](https://github.com/chr233/ASFAchievementManagerEx/releases/tag/1.0.1.2) |    5.4.10.3    | Первая версия                         |
-
-<details>
-  <summary>История изменений</summary>
-
-</details>
-
 ## Конфигурация плагина
 
 > Configuration key is change to ASFEnhance

@@ -42,17 +42,7 @@
 
 > 推荐搭配 [ASFEnhance](https://github.com/chr233/ASFEnhance) 使用, 可以通过 ASFEnhance 实现插件更新管理和禁用特定命令等功能
 
-### 更新日志
 
-| ASFAchievementManagerEx 版本                                                      | 适配 ASF 版本 | 更新说明        |
-| --------------------------------------------------------------------------------- | :-----------: | --------------- |
-| [1.0.2.0](https://github.com/chr233/ASFAchievementManagerEx/releases/tag/1.0.2.0) |   5.4.12.5    | ASF->5.4.12.5, 接入 ASFEnhance |
-| [1.0.1.2](https://github.com/chr233/ASFAchievementManagerEx/releases/tag/1.0.1.2) |   5.4.10.3    | 第一个版本      |
-
-<details>
-  <summary>历史版本</summary>
-
-</details>
 
 ## 插件配置说明
 

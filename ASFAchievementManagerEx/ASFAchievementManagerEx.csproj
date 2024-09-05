@@ -8,7 +8,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\ArchiSteamFarm\ArchiSteamFarm\ArchiSteamFarm.csproj" ExcludeAssets="all" Private="false" />
+		<ProjectReference Include="..\ArchiSteamFarm\ArchiSteamFarm\ArchiSteamFarm.csproj" ExcludeAssets="all" Private="false" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -18,29 +18,19 @@
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" />
 		<PackageReference Include="System.Composition.AttributedModel" />
 		<PackageReference Include="System.Linq.Async" IncludeAssets="compile" />
+		<PackageReference Include="Microsoft.CodeAnalysis.ResxSourceGenerator" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Using Include="ASFAchievementManagerEx.Data" />
-	  <Using Include="ASFAchievementManagerEx.Localization" />
-	  <Using Include="ASFAchievementManagerEx.Utils">
-	    <Static>True</Static>
-	  </Using>
+		<Using Include="ASFAchievementManagerEx.Data" />
+		<Using Include="ASFAchievementManagerEx.Localization" />
+		<Using Include="ASFAchievementManagerEx.Utils">
+			<Static>True</Static>
+		</Using>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Localization\Langs.Designer.cs">
-	    <DependentUpon>Langs.resx</DependentUpon>
-	    <DesignTime>True</DesignTime>
-	    <AutoGen>True</AutoGen>
-	  </Compile>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <EmbeddedResource Update="Localization\Langs.resx">
-	    <LastGenOutput>Langs.Designer.cs</LastGenOutput>
-	    <Generator>ResXFileCodeGenerator</Generator>
-	  </EmbeddedResource>
+		<EmbeddedResource Update="Localization\Langs.resx" EmitFormatMethods="true" Public="false" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
