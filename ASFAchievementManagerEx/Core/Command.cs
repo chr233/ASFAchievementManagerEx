@@ -6,12 +6,13 @@ using System.Collections.Concurrent;
 using System.Text;
 
 namespace ASFAchievementManagerEx.Core;
+
 internal static class Command
 {
-    internal static ConcurrentDictionary<Bot, AchievementHandler> Handlers { get; private set; } = new();
+    internal static ConcurrentDictionary<Bot, AchievementHandler> Handlers { get; } = new();
 
     /// <summary>
-    /// 显示成就列表
+    ///     显示成就列表
     /// </summary>
     /// <param name="bot"></param>
     /// <param name="appIds"></param>
@@ -29,7 +30,7 @@ internal static class Command
 
         foreach (var entry in entries)
         {
-            if (!uint.TryParse(entry, out uint gameId) || (gameId == 0))
+            if (!uint.TryParse(entry, out var gameId) || gameId == 0)
             {
                 sb.AppendLine(bot.FormatBotResponse(Langs.ArgsInvalid, nameof(gameId), gameId));
             }
@@ -58,7 +59,9 @@ internal static class Command
                     }
                     else
                     {
-                        sb.AppendLine(bot.FormatBotResponse(bot.IsConnectedAndLoggedOn ? string.Format(Langs.GetAchievementDataFailure, entry) : Strings.BotNotConnected));
+                        sb.AppendLine(bot.FormatBotResponse(bot.IsConnectedAndLoggedOn
+                            ? string.Format(Langs.GetAchievementDataFailure, entry)
+                            : Strings.BotNotConnected));
                     }
                 }
                 catch (Exception ex)
@@ -75,7 +78,7 @@ internal static class Command
     }
 
     /// <summary>
-    /// 获取成就列表 (多个Bot)
+    ///     获取成就列表 (多个Bot)
     /// </summary>
     /// <param name="botNames"></param>
     /// <param name="appIds"></param>
@@ -94,14 +97,15 @@ internal static class Command
             return FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
         }
 
-        var results = await Utilities.InParallel(bots.Select(bot => ResponseGetAchievementList(bot, appIds))).ConfigureAwait(false);
+        var results = await Utilities.InParallel(bots.Select(bot => ResponseGetAchievementList(bot, appIds)))
+            .ConfigureAwait(false);
         var responses = new List<string?>(results.Where(result => !string.IsNullOrEmpty(result)));
 
         return responses.Count > 0 ? string.Join(Environment.NewLine, responses) : null;
     }
 
     /// <summary>
-    /// 获取成就数据列表
+    ///     获取成就数据列表
     /// </summary>
     /// <param name="bot"></param>
     /// <param name="appIds"></param>
@@ -119,7 +123,7 @@ internal static class Command
 
         foreach (var entry in entries)
         {
-            if (!uint.TryParse(entry, out uint gameId) || (gameId == 0))
+            if (!uint.TryParse(entry, out var gameId) || gameId == 0)
             {
                 sb.AppendLine(bot.FormatBotResponse(Langs.ArgsInvalid, nameof(gameId), gameId));
             }
@@ -144,13 +148,17 @@ internal static class Command
                                 stats.Name,
                                 stats.IsProtected ? Langs.EmojiLock : "",
                                 stats.IsIncrementOnly ? Langs.EmojiIncrementOnly : "",
-                                stats.MaxChange != null ? string.Format(Langs.MaxChange, Langs.EmojiWarning, stats.MaxChange) : ""
+                                stats.MaxChange != null
+                                    ? string.Format(Langs.MaxChange, Langs.EmojiWarning, stats.MaxChange)
+                                    : ""
                             );
                         }
                     }
                     else
                     {
-                        sb.AppendLine(bot.FormatBotResponse(bot.IsConnectedAndLoggedOn ? string.Format(Langs.GetAchievementDataFailure, entry) : Strings.BotNotConnected));
+                        sb.AppendLine(bot.FormatBotResponse(bot.IsConnectedAndLoggedOn
+                            ? string.Format(Langs.GetAchievementDataFailure, entry)
+                            : Strings.BotNotConnected));
                     }
                 }
                 catch (Exception e)
@@ -167,7 +175,7 @@ internal static class Command
     }
 
     /// <summary>
-    /// 获取成就数据列表 (多个Bot)
+    ///     获取成就数据列表 (多个Bot)
     /// </summary>
     /// <param name="botNames"></param>
     /// <param name="appId"></param>
@@ -186,7 +194,8 @@ internal static class Command
             return Commands.FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
         }
 
-        var results = await Utilities.InParallel(bots.Select(bot => ResponseGetStatsList(bot, appId))).ConfigureAwait(false);
+        var results = await Utilities.InParallel(bots.Select(bot => ResponseGetStatsList(bot, appId)))
+            .ConfigureAwait(false);
 
         var responses = new List<string?>(results.Where(result => !string.IsNullOrEmpty(result)));
 
@@ -194,7 +203,7 @@ internal static class Command
     }
 
     /// <summary>
-    /// 修改成就
+    ///     修改成就
     /// </summary>
     /// <param name="bot"></param>
     /// <param name="appId"></param>
@@ -208,7 +217,7 @@ internal static class Command
             throw new ArgumentNullException(nameof(query));
         }
 
-        if (!Handlers.TryGetValue(bot, out AchievementHandler? handler))
+        if (!Handlers.TryGetValue(bot, out var handler))
         {
             return Langs.InternalError;
         }
@@ -289,8 +298,10 @@ internal static class Command
 
             if (effectedAchievements.Count != 0)
             {
-                var result = await handler.ModifyAchievements(bot, gameId, crc_status, effectedAchievements, unlock).ConfigureAwait(false);
-                sb.AppendLineFormat(Langs.SetAchievementResult, result == true ? Langs.Success : Langs.Failure, effectedAchievements.Count);
+                var result = await handler.ModifyAchievements(bot, gameId, crc_status, effectedAchievements, unlock)
+                    .ConfigureAwait(false);
+                sb.AppendLineFormat(Langs.SetAchievementResult, result == true ? Langs.Success : Langs.Failure,
+                    effectedAchievements.Count);
             }
             else
             {
@@ -307,14 +318,15 @@ internal static class Command
     }
 
     /// <summary>
-    /// 修改成就 (多个Bot)
+    ///     修改成就 (多个Bot)
     /// </summary>
     /// <param name="botNames"></param>
     /// <param name="appId"></param>
     /// <param name="achievementNumbers"></param>
     /// <param name="unlock"></param>
     /// <returns></returns>
-    internal static async Task<string?> ResponseSetAchievement(string botNames, string appId, string achievementNumbers, bool unlock = true)
+    internal static async Task<string?> ResponseSetAchievement(string botNames, string appId, string achievementNumbers,
+        bool unlock = true)
     {
         if (string.IsNullOrEmpty(botNames))
         {
@@ -328,7 +340,9 @@ internal static class Command
             return FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
         }
 
-        var results = await Utilities.InParallel(bots.Select(bot => ResponseSetAchievement(bot, appId, achievementNumbers, unlock))).ConfigureAwait(false);
+        var results = await Utilities
+            .InParallel(bots.Select(bot => ResponseSetAchievement(bot, appId, achievementNumbers, unlock)))
+            .ConfigureAwait(false);
 
         var responses = new List<string?>(results.Where(result => !string.IsNullOrEmpty(result)));
 
@@ -337,7 +351,7 @@ internal static class Command
 
 
     /// <summary>
-    /// 修改统计数据
+    ///     修改统计数据
     /// </summary>
     /// <param name="bot"></param>
     /// <param name="appId"></param>
@@ -350,7 +364,7 @@ internal static class Command
             throw new ArgumentNullException(nameof(query));
         }
 
-        if (!Handlers.TryGetValue(bot, out AchievementHandler? handler))
+        if (!Handlers.TryGetValue(bot, out var handler))
         {
             return Langs.InternalError;
         }
@@ -401,24 +415,30 @@ internal static class Command
                             case "default":
                                 if (stat.Default == null)
                                 {
-                                    warnings.AppendLineFormat(Langs.StatsCantSetToDefault, stat.Id, stat.Name, stat.StrValue);
+                                    warnings.AppendLineFormat(Langs.StatsCantSetToDefault, stat.Id, stat.Name,
+                                        stat.StrValue);
                                 }
+
                                 targetValue = stat.Default;
                                 break;
                             case "i":
                             case "min":
                                 if (stat.Min == null)
                                 {
-                                    warnings.AppendLineFormat(Langs.StatsCantSetToMin, stat.Id, stat.Name, stat.StrValue);
+                                    warnings.AppendLineFormat(Langs.StatsCantSetToMin, stat.Id, stat.Name,
+                                        stat.StrValue);
                                 }
+
                                 targetValue = stat.Min;
                                 break;
                             case "a":
                             case "max":
                                 if (stat.Max == null)
                                 {
-                                    warnings.AppendLineFormat(Langs.StatsCantSetToMax, stat.Id, stat.Name, stat.StrValue);
+                                    warnings.AppendLineFormat(Langs.StatsCantSetToMax, stat.Id, stat.Name,
+                                        stat.StrValue);
                                 }
+
                                 targetValue = stat.Max;
                                 break;
                             default:
@@ -428,8 +448,10 @@ internal static class Command
                                 }
                                 else
                                 {
-                                    warnings.AppendLineFormat(Langs.StatsTargetValueInvalid, stat.Id, stat.Name, stat.StrValue, args[1]);
+                                    warnings.AppendLineFormat(Langs.StatsTargetValueInvalid, stat.Id, stat.Name,
+                                        stat.StrValue, args[1]);
                                 }
+
                                 break;
                         }
 
@@ -437,19 +459,26 @@ internal static class Command
                         {
                             if (stat.Value == targetValue)
                             {
-                                warnings.AppendLineFormat(Langs.StatsChangeUnnecessary, index, stat.Name, stat.StrValue);
+                                warnings.AppendLineFormat(Langs.StatsChangeUnnecessary, index, stat.Name,
+                                    stat.StrValue);
                             }
                             else if (stat.IsIncrementOnly && stat.Value > targetValue)
                             {
-                                warnings.AppendLineFormat(Langs.StatsIncrementOnlyLimited, index, stat.Name, stat.StrValue, targetValue);
+                                warnings.AppendLineFormat(Langs.StatsIncrementOnlyLimited, index, stat.Name,
+                                    stat.StrValue, targetValue);
                             }
                             else if (stat.MaxChange != null)
                             {
-                                var changeValue = stat.Value > targetValue ? stat.Value - targetValue : targetValue - stat.Value;
+                                var changeValue = stat.Value > targetValue
+                                    ? stat.Value - targetValue
+                                    : targetValue - stat.Value;
                                 if (changeValue > stat.MaxChange)
                                 {
-                                    warnings.AppendLineFormat(Langs.StatsMaxChangeLimited, index, stat.Name, stat.StrValue, targetValue, stat.MaxChange);
-                                    targetValue = stat.Value > targetValue ? stat.Value + stat.MaxChange : stat.Value - stat.MaxChange;
+                                    warnings.AppendLineFormat(Langs.StatsMaxChangeLimited, index, stat.Name,
+                                        stat.StrValue, targetValue, stat.MaxChange);
+                                    targetValue = stat.Value > targetValue
+                                        ? stat.Value + stat.MaxChange
+                                        : stat.Value - stat.MaxChange;
                                 }
                             }
 
@@ -479,8 +508,10 @@ internal static class Command
 
             if (effectedAchievements.Count != 0)
             {
-                var result = await handler.ModifyStats(bot, gameId, crc_status, effectedAchievements).ConfigureAwait(false);
-                sb.AppendLineFormat(Langs.SetStatsResult, result == true ? Langs.Success : Langs.Failure, effectedAchievements.Count);
+                var result = await handler.ModifyStats(bot, gameId, crc_status, effectedAchievements)
+                    .ConfigureAwait(false);
+                sb.AppendLineFormat(Langs.SetStatsResult, result == true ? Langs.Success : Langs.Failure,
+                    effectedAchievements.Count);
             }
             else
             {
@@ -497,7 +528,7 @@ internal static class Command
     }
 
     /// <summary>
-    /// 修改统计数据 (多个Bot)
+    ///     修改统计数据 (多个Bot)
     /// </summary>
     /// <param name="botNames"></param>
     /// <param name="appId"></param>
@@ -517,7 +548,8 @@ internal static class Command
             return FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
         }
 
-        var results = await Utilities.InParallel(bots.Select(bot => ResponseSetStats(bot, appId, query))).ConfigureAwait(false);
+        var results = await Utilities.InParallel(bots.Select(bot => ResponseSetStats(bot, appId, query)))
+            .ConfigureAwait(false);
         var responses = new List<string?>(results.Where(result => !string.IsNullOrEmpty(result)));
 
         return responses.Count > 0 ? string.Join(Environment.NewLine, responses) : null;

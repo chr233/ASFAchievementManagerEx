@@ -10,29 +10,25 @@ namespace ASFAchievementManagerEx.Core;
 internal sealed class AchievementHandler : ClientMsgHandler
 {
     /// <summary>
-    /// 处理客户端消息
+    ///     处理客户端消息
     /// </summary>
     /// <param name="packetMsg"></param>
     public override void HandleMsg(IPacketMsg packetMsg)
     {
-        if (packetMsg == null)
-        {
-            ASFLogger.LogNullError(packetMsg);
-            return;
-        }
-
         try
         {
             switch (packetMsg.MsgType)
             {
                 case EMsg.ClientGetUserStatsResponse:
                     var getAchievementsResponse = new ClientMsgProtobuf<CMsgClientGetUserStatsResponse>(packetMsg);
-                    Client.PostCallback(new GetAchievementsCallback(packetMsg.TargetJobID, getAchievementsResponse.Body));
+                    Client.PostCallback(
+                        new GetAchievementsCallback(packetMsg.TargetJobID, getAchievementsResponse.Body));
                     break;
 
                 case EMsg.ClientStoreUserStatsResponse:
                     var setAchievementsResponse = new ClientMsgProtobuf<CMsgClientStoreUserStatsResponse>(packetMsg);
-                    Client.PostCallback(new SetAchievementsCallback(packetMsg.TargetJobID, setAchievementsResponse.Body));
+                    Client.PostCallback(
+                        new SetAchievementsCallback(packetMsg.TargetJobID, setAchievementsResponse.Body));
                     break;
             }
         }
@@ -40,16 +36,15 @@ internal sealed class AchievementHandler : ClientMsgHandler
         {
             ASFLogger.LogGenericException(ex);
         }
-
     }
 
     /// <summary>
-    /// 获取成就数据
+    ///     获取成就数据
     /// </summary>
     /// <param name="bot"></param>
-    /// <param name="gameID"></param>
+    /// <param name="gameId"></param>
     /// <returns></returns>
-    private async Task<(UserStatsData? data, uint crc_stats)> GetAchievementsResponse(Bot bot, ulong gameID)
+    private async Task<(UserStatsData? data, uint crc_stats)> GetAchievementsResponse(Bot bot, ulong gameId)
     {
         if (!Client.IsConnected)
         {
@@ -59,15 +54,13 @@ internal sealed class AchievementHandler : ClientMsgHandler
         var request = new ClientMsgProtobuf<CMsgClientGetUserStats>(EMsg.ClientGetUserStats)
         {
             SourceJobID = Client.GetNextJobID(),
-            Body = {
-                game_id =  gameID,
-                steam_id_for_user = bot.SteamID,
-            },
+            Body = { game_id = gameId, steam_id_for_user = bot.SteamID }
         };
 
         Client.Send(request);
 
-        var response = await new AsyncJob<GetAchievementsCallback>(Client, request.SourceJobID).ToLongRunningTask().ConfigureAwait(false);
+        var response = await new AsyncJob<GetAchievementsCallback>(Client, request.SourceJobID).ToLongRunningTask()
+            .ConfigureAwait(false);
         if (response?.Response == null || !response.Success)
         {
             return (null, 0);
@@ -78,7 +71,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
     }
 
     /// <summary>
-    /// 解析响应数据
+    ///     解析响应数据
     /// </summary>
     /// <param name="payload"></param>
     /// <returns></returns>
@@ -122,7 +115,8 @@ internal sealed class AchievementHandler : ClientMsgHandler
                         var permission = bit.ReadAsInt("permission", 0);
 
                         var process = bit.FindByName("process");
-                        var dependancyName = bit.FindListByName("progress")?.FindListByName("value")?.FindByName("operand1")?.Value;
+                        var dependancyName = bit.FindListByName("progress")?.FindListByName("value")
+                            ?.FindByName("operand1")?.Value;
 
                         var dependancyValue = process?.ReadAsUInt("max_val") ?? 0;
 
@@ -197,7 +191,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
                         Default = def,
                         MaxChange = maxChange,
                         Min = min,
-                        Max = max,
+                        Max = max
                     };
 
                     if (!statsDict.TryAdd(id, stats))
@@ -212,7 +206,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
     }
 
     /// <summary>
-    /// 获取用户成就数据
+    ///     获取用户成就数据
     /// </summary>
     /// <param name="bot"></param>
     /// <param name="gameID"></param>
@@ -224,7 +218,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
     }
 
     /// <summary>
-    /// 获取用户成就数据
+    ///     获取用户成就数据
     /// </summary>
     /// <param name="bot"></param>
     /// <param name="gameID"></param>
@@ -235,11 +229,12 @@ internal sealed class AchievementHandler : ClientMsgHandler
     }
 
     /// <summary>
-    /// 添加修改的成就
+    ///     添加修改的成就
     /// </summary>
     /// <param name="achievements"></param>
     /// <param name="unlock"></param>
-    private static Dictionary<uint, CMsgClientStoreUserStats2.Stats> GetEffectAchievementDict(HashSet<AchievementData> achievements, bool unlock)
+    private static Dictionary<uint, CMsgClientStoreUserStats2.Stats> GetEffectAchievementDict(
+        HashSet<AchievementData> achievements, bool unlock)
     {
         var effectedStatsDict = new Dictionary<uint, CMsgClientStoreUserStats2.Stats>();
 
@@ -269,7 +264,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
             {
                 if (!effectedStatsDict.ContainsKey(achievement.Dependancy))
                 {
-                    var dependancystat = new CMsgClientStoreUserStats2.Stats()
+                    var dependancystat = new CMsgClientStoreUserStats2.Stats
                     {
                         stat_id = achievement.Dependancy,
                         stat_value = unlock ? achievement.DependancyValue : 0
@@ -278,11 +273,12 @@ internal sealed class AchievementHandler : ClientMsgHandler
                 }
             }
         }
+
         return effectedStatsDict;
     }
 
     /// <summary>
-    /// 添加修改的统计项
+    ///     添加修改的统计项
     /// </summary>
     /// <param name="statsList"></param>
     /// <returns></returns>
@@ -291,18 +287,15 @@ internal sealed class AchievementHandler : ClientMsgHandler
         var effectedStatsDict = new List<CMsgClientStoreUserStats2.Stats>();
         foreach (var stats in statsList)
         {
-            var currentstat = new CMsgClientStoreUserStats2.Stats
-            {
-                stat_id = stats.Id,
-                stat_value = stats.Value
-            };
+            var currentstat = new CMsgClientStoreUserStats2.Stats { stat_id = stats.Id, stat_value = stats.Value };
             effectedStatsDict.Add(currentstat);
         }
+
         return effectedStatsDict;
     }
 
     /// <summary>
-    /// 修改成就
+    ///     修改成就
     /// </summary>
     /// <param name="bot"></param>
     /// <param name="appId"></param>
@@ -310,7 +303,8 @@ internal sealed class AchievementHandler : ClientMsgHandler
     /// <param name="achievements"></param>
     /// <param name="unlock"></param>
     /// <returns></returns>
-    internal async Task<bool?> ModifyAchievements(Bot bot, uint appId, uint crc_stats, HashSet<AchievementData> achievements, bool unlock)
+    internal async Task<bool?> ModifyAchievements(Bot bot, uint appId, uint crc_stats,
+        HashSet<AchievementData> achievements, bool unlock)
     {
         var effectedStatsDict = GetEffectAchievementDict(achievements, unlock);
 
@@ -319,28 +313,28 @@ internal sealed class AchievementHandler : ClientMsgHandler
             var request = new ClientMsgProtobuf<CMsgClientStoreUserStats2>(EMsg.ClientStoreUserStats2)
             {
                 SourceJobID = Client.GetNextJobID(),
-                Body = {
-                    game_id =  appId,
+                Body =
+                {
+                    game_id = appId,
                     settor_steam_id = bot.SteamID,
                     settee_steam_id = bot.SteamID,
                     explicit_reset = false,
-                    crc_stats =crc_stats
+                    crc_stats = crc_stats
                 }
             };
             request.Body.stats.AddRange(effectedStatsDict.Values);
             Client.Send(request);
 
-            var setResponse = await new AsyncJob<SetAchievementsCallback>(Client, request.SourceJobID).ToLongRunningTask().ConfigureAwait(false);
+            var setResponse = await new AsyncJob<SetAchievementsCallback>(Client, request.SourceJobID)
+                .ToLongRunningTask().ConfigureAwait(false);
             return setResponse?.Success;
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
     /// <summary>
-    /// 修改统计项
+    ///     修改统计项
     /// </summary>
     /// <param name="bot"></param>
     /// <param name="appId"></param>
@@ -356,23 +350,23 @@ internal sealed class AchievementHandler : ClientMsgHandler
             var request = new ClientMsgProtobuf<CMsgClientStoreUserStats2>(EMsg.ClientStoreUserStats2)
             {
                 SourceJobID = Client.GetNextJobID(),
-                Body = {
-                    game_id =  appId,
+                Body =
+                {
+                    game_id = appId,
                     settor_steam_id = bot.SteamID,
                     settee_steam_id = bot.SteamID,
                     explicit_reset = false,
-                    crc_stats =crc_stats
+                    crc_stats = crc_stats
                 }
             };
             request.Body.stats.AddRange(effectedStatsList);
             Client.Send(request);
 
-            var setResponse = await new AsyncJob<SetAchievementsCallback>(Client, request.SourceJobID).ToLongRunningTask().ConfigureAwait(false);
+            var setResponse = await new AsyncJob<SetAchievementsCallback>(Client, request.SourceJobID)
+                .ToLongRunningTask().ConfigureAwait(false);
             return setResponse?.Success;
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 }
