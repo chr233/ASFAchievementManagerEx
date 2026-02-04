@@ -1,12 +1,11 @@
 <Project>
 	<PropertyGroup>
-		<Version>1.1.3.0</Version>
+		<Version>1.1.4.0</Version>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<Authors>Chr_</Authors>
 		<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-		<Company>chrxw.com</Company>
 		<Copyright>Copyright © 2021-$([System.DateTime]::UtcNow.Year) $(Company)</Copyright>
 		<Description>An ArchiSteamFarm plugin developed by Chr_, and Rudokhvist</Description>
 		<Deterministic>true</Deterministic>
@@ -26,7 +25,7 @@
 		<RollForward>LatestMajor</RollForward>
 		<RuntimeIdentifiers>linux-arm;linux-arm64;linux-x64;osx-arm64;osx-x64;win-arm64;win-x64</RuntimeIdentifiers>
 		<TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">

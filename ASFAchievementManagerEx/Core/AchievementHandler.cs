@@ -103,7 +103,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
         //first we enumerate all real achievements
         foreach (var stat in keyValues.FindEnumByName("stats"))
         {
-            if (stat.ReadAsInt("type") == 4)
+            if (stat.FindByName("type")?.Value is "ACHIEVEMENTS")
             {
                 foreach (var bit in stat.FindEnumByName("bits"))
                 {
@@ -153,7 +153,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
         //Now we update all dependancies
         foreach (var stat in keyValues.FindEnumByName("stats"))
         {
-            if (stat.ReadAsInt("type", 0) == 1)
+            if (stat.FindByName("type")?.Value is "INT")
             {
                 if (uint.TryParse(stat.Name, out var statId))
                 {
