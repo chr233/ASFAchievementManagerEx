@@ -157,8 +157,6 @@ internal sealed class AchievementHandler : ClientMsgHandler
             {
                 if (uint.TryParse(stat.Name, out var statId))
                 {
-                    var id = stat.ReadAsUInt("id", 0);
-
                     var name = stat.FindByName("name")?.Value;
                     if (string.IsNullOrEmpty(name))
                     {
@@ -183,7 +181,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
 
                     var stats = new StatsData
                     {
-                        Id = id,
+                        Id = statId,
                         Name = display ?? "",
                         IsIncrementOnly = isIncrementonly,
                         Permission = permission,
@@ -194,7 +192,7 @@ internal sealed class AchievementHandler : ClientMsgHandler
                         Max = max
                     };
 
-                    if (!statsDict.TryAdd(id, stats))
+                    if (!statsDict.TryAdd(statId, stats))
                     {
                         ASFLogger.LogGenericWarning("id重复");
                     }
